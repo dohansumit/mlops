@@ -42,13 +42,58 @@ jobs:
       - name: Set IMAGE_USED output (compat)
         id: set-image
         run: |
-          # read file written by previous step (GITHUB_OUTPUT contains IMAGE_USED)
-          # fallback: compute again
           if [ "${{ github.event.inputs.image_ref }}" != "" ]; then
             echo "::set-output name=image_used::${{ github.event.inputs.image_ref }}"
           else
             echo "::set-output name=image_used::${{ env.IMAGE_REF }}"
           fi
+
+      - name: Prepare workspace data dir
+        run: |
+          set -euo pipefail
+          mkdir -p "${{ github.workspace }}/data"
+          ls -la "${{ github.workspace }}" || true
+
+      - name: Run repo scripts (ingestion, preprocess, model, app) on the runner BEFORE container
+        id: run-scripts
+        run: |
+          set -euo pipefail
+          SCRIPTS_DIR="${{ github.workspace }}/scripts"
+          DATA_DIR="${{ github.workspace }}/data"
+          mkdir -p "${DATA_DIR}"
+          echo "Looking for scripts in ${SCRIPTS_DIR}"
+          if [ ! -d "${SCRIPTS_DIR}" ]; then
+            echo "No scripts/ directory found in repo; skipping script-run step."
+            exit 0
+          fi
+          chmod -R +x "${SCRIPTS_DIR}" || true
+
+          run_one() {
+            local name="$1"
+            local cmd="$2"
+            echo "=== RUN ${name} ==="
+            if [ ! -f "${cmd}" ]; then
+              echo "WARN: ${cmd} not found; skipping ${name}"
+              return 0
+            fi
+            if "${cmd}"; then
+              echo "${name} ok at $(date -u)" > "${DATA_DIR}/.${name}_done"
+              echo "=== ${name} SUCCEEDED ==="
+            else
+              echo "${name} FAILED at $(date -u)" > "${DATA_DIR}/.${name}_failed"
+              echo "=== ${name} FAILED ===" >&2
+              tail -n 200 "${DATA_DIR}"/* || true
+              exit 1
+            fi
+          }
+
+          run_one "ingestion"  "${SCRIPTS_DIR}/ingestion.sh"
+          run_one "preprocess" "${SCRIPTS_DIR}/preprocess.sh"
+          run_one "model"      "${SCRIPTS_DIR}/model.sh"
+          run_one "app"        "${SCRIPTS_DIR}/app.sh"
+
+          echo "Script-run finished. Marker files in ${DATA_DIR}:"
+          ls -la "${DATA_DIR}" | sed -n '1,200p' || true
 
       - name: Log in to DockerHub
         uses: docker/login-action@v2
@@ -76,7 +121,8 @@ jobs:
             -e MLFLOW_PORT=5051 \
             -e MLFLOW_START_TIMEOUT=60 \
             -p 5051:5051 -p 8080:8080 \
-            -v ${{ github.workspace }}/data:/app/data \
+            -v "${{ github.workspace }}/data":/app/data \
+            -v "${{ github.workspace }}/scripts":/app/scripts \
             "${IMAGE_TO_RUN}"
 
       - name: Wait for FastAPI and MLflow to be healthy (retries)
@@ -106,14 +152,17 @@ jobs:
   deploy-to-self-hosted:
     name: Deploy to self-hosted runner (PowerEdge)
     needs: pull-and-smoke
-    # Use 'self-hosted' (or change to [self-hosted,poweredge] if your runner has a custom 'poweredge' label)
-    runs-on: self-hosted
+    # Use explicit runner labels so GitHub dispatches to your PowerEdge runner
+    runs-on: [self-hosted, Linux, X64]
 
     steps:
       - name: Print runner info (labels & name)
         run: |
           echo "GitHub runner labels: ${{ toJson(github.runner.labels) }}"
           echo "Runner name: ${{ github.runner.name || 'unknown' }}"
+
+      - name: Checkout repository (needed to access scripts)
+        uses: actions/checkout@v4
 
       - name: Check required secrets are present
         run: |
@@ -131,16 +180,57 @@ jobs:
           fi
           echo "Docker present: $(docker --version)"
 
-      - name: Log in to DockerHub on target
-        run: |
-          set -euo pipefail
-          docker login -u "${{ secrets.DOCKERHUB_USERNAME }}" -p "${{ secrets.DOCKERHUB_TOKEN }}"
-
       - name: Prepare host path & cleanup previous container
         run: |
           set -euo pipefail
           mkdir -p /home/sweta/mtp/data
           docker rm -f mtp_root 2>/dev/null || true
+
+      - name: Run repo scripts on self-hosted runner (prepare /home/sweta/mtp/data) BEFORE container
+        run: |
+          set -euo pipefail
+          SCRIPTS_DIR="${{ github.workspace }}/scripts"
+          HOST_DATA_DIR="/home/sweta/mtp/data"
+          mkdir -p "${HOST_DATA_DIR}"
+          echo "Running scripts from ${SCRIPTS_DIR} targeting ${HOST_DATA_DIR}"
+          if [ ! -d "${SCRIPTS_DIR}" ]; then
+            echo "No scripts/ directory found in repo; skipping host script-run step."
+            exit 0
+          fi
+          chmod -R +x "${SCRIPTS_DIR}" || true
+
+          run_one() {
+            local name="$1"
+            local cmd="$2"
+            echo "=== RUN ${name} (host) ==="
+            if [ ! -f "${cmd}" ]; then
+              echo "WARN: ${cmd} not found; skipping ${name}"
+              return 0
+            fi
+            DATA_DIR="${HOST_DATA_DIR}" ${cmd}
+            rc=$?
+            if [ $rc -eq 0 ]; then
+              echo "${name} ok at $(date -u)" > "${HOST_DATA_DIR}/.${name}_done"
+              echo "=== ${name} SUCCEEDED ==="
+            else
+              echo "${name} FAILED at $(date -u)" > "${HOST_DATA_DIR}/.${name}_failed"
+              echo "=== ${name} FAILED ===" >&2
+              exit $rc
+            fi
+          }
+
+          run_one "ingestion"  "${SCRIPTS_DIR}/ingestion.sh"
+          run_one "preprocess" "${SCRIPTS_DIR}/preprocess.sh"
+          run_one "model"      "${SCRIPTS_DIR}/model.sh"
+          run_one "app"        "${SCRIPTS_DIR}/app.sh"
+
+          echo "Host script-run finished. Marker files in ${HOST_DATA_DIR}:"
+          ls -la "${HOST_DATA_DIR}" | sed -n '1,200p' || true
+
+      - name: Log in to DockerHub on target
+        run: |
+          set -euo pipefail
+          docker login -u "${{ secrets.DOCKERHUB_USERNAME }}" -p "${{ secrets.DOCKERHUB_TOKEN }}"
 
       - name: Pull image on target (fail if not available)
         run: |
@@ -149,7 +239,7 @@ jobs:
           echo "Pulling image ${IMAGE_TO_DEPLOY}"
           docker pull "${IMAGE_TO_DEPLOY}"
 
-      - name: Start new container (MLflow on host 5051)
+      - name: Start new container (MLflow on host 5051) and mount scripts
         run: |
           set -euo pipefail
           IMAGE_TO_DEPLOY="${{ needs.pull-and-smoke.outputs.IMAGE_USED }}"
@@ -161,6 +251,7 @@ jobs:
             -e MLFLOW_START_TIMEOUT=120 \
             -p 5051:5051 -p 8080:8080 \
             -v /home/sweta/mtp/data:/app/data \
+            -v "${{ github.workspace }}/scripts":/app/scripts \
             "${IMAGE_TO_DEPLOY}"
 
       - name: Wait & verify endpoints on self-hosted
