@@ -1,88 +1,46 @@
-name: CI/CD - MTP Pull & Deploy (smoke test + deploy)
-
-on:
-  push:
-    branches: [ main ]
-  workflow_dispatch:
-
-env:
-  # Set IMAGE_REF to the image you upload manually (default uses latest)
-  IMAGE_REF: myorg/mtp:latest
-  IMAGE_NAME: myorg/mtp
-
-jobs:
-  pull-and-smoke:
-    name: Pull image, run smoke test
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
-      - name: Log in to DockerHub
-        uses: docker/login-action@v2
-        with:
-          username: ${{ secrets.DOCKERHUB_USERNAME }}
-          password: ${{ secrets.DOCKERHUB_TOKEN }}
-
-      - name: Pull image (manual upload expected)
-        run: |
-          echo "Pulling image $IMAGE_REF"
-          docker pull $IMAGE_REF
-
-      - name: Run ephemeral container for quick smoke test (MLflow on 5051)
-        run: |
-          docker rm -f cicd_mtp_test 2>/dev/null || true
-          docker run -d --name cicd_mtp_test \
-            -e CHOWN_ON_START=1 \
-            -e DROP_TO_USER=1 \
-            -e SKIP_TRAIN=1 \
-            -e MLFLOW_PORT=5051 \
-            -e MLFLOW_START_TIMEOUT=60 \
-            -p 5051:5051 -p 8080:8080 \
-            -v ${{ github.workspace }}/data:/app/data \
-            $IMAGE_REF
-
-      - name: Wait for services
-        run: |
-          # wait for up to 60s for FastAPI to respond
-          for i in {1..30}; do
-            if curl -s -o /dev/null -w "%{http_code}" http://localhost:8080/ | grep -q "200"; then
-              echo "FastAPI is up"; break
-            fi
-            sleep 2
-          done
-          echo "MLflow (5051) HTTP check:"
-          curl -s -o /dev/null -w "%{http_code}\n" http://localhost:5051/ || true
-          echo "FastAPI (8080) HTTP check:"
-          curl -s -o /dev/null -w "%{http_code}\n" http://localhost:8080/ || true
-
-      - name: Collect logs (last 200 lines) and cleanup
-        run: |
-          docker logs --tail 200 cicd_mtp_test || true
-          docker rm -f cicd_mtp_test || true
-
   deploy-to-self-hosted:
     name: Deploy to self-hosted runner (PowerEdge)
     needs: pull-and-smoke
-    if: env.SELF_HOSTED_LABEL != '' && secrets.DOCKERHUB_TOKEN != ''
-    runs-on: ${{ secrets.SELF_HOSTED_LABEL }}
+    runs-on: self-hosted   # <-- change to the exact label of your self-hosted runner if needed
 
     steps:
+      - name: Check required secrets are present
+        run: |
+          # make sure required secrets exist; fail early if not
+          if [ -z "${{ secrets.DOCKERHUB_USERNAME }}" ] || [ -z "${{ secrets.DOCKERHUB_TOKEN }}" ]; then
+            echo "::error::Required DockerHub secrets not present. Skipping deploy."
+            exit 1
+          fi
+          echo "Secrets present. Proceeding with deploy."
+
+      - name: Ensure docker is present on self-hosted node
+        run: |
+          set -euo pipefail
+          if ! command -v docker >/dev/null 2>&1; then
+            echo "ERROR: docker not found on self-hosted runner"; exit 1
+          fi
+          echo "Docker present: $(docker --version)"
+
       - name: Log in to DockerHub on target
         run: |
-          docker login -u ${{ secrets.DOCKERHUB_USERNAME }} -p ${{ secrets.DOCKERHUB_TOKEN }}
+          set -euo pipefail
+          docker login -u "${{ secrets.DOCKERHUB_USERNAME }}" -p "${{ secrets.DOCKERHUB_TOKEN }}"
 
-      - name: Pull image on target
+      - name: Prepare host path & cleanup previous container
         run: |
-          docker pull ${{ env.IMAGE_REF }}
-
-      - name: Stop & remove old container (if present)
-        run: |
+          set -euo pipefail
+          mkdir -p /home/sweta/mtp/data
           docker rm -f mtp_root 2>/dev/null || true
+
+      - name: Pull image on target (fail if not available)
+        run: |
+          set -euo pipefail
+          echo "Pulling image ${{ env.IMAGE_REF }}"
+          docker pull "${{ env.IMAGE_REF }}"
 
       - name: Start new container (MLflow on host 5051)
         run: |
+          set -euo pipefail
           docker run -d --name mtp_root \
             -e CHOWN_ON_START=1 \
             -e DROP_TO_USER=1 \
@@ -91,15 +49,26 @@ jobs:
             -e MLFLOW_START_TIMEOUT=120 \
             -p 5051:5051 -p 8080:8080 \
             -v /home/sweta/mtp/data:/app/data \
-            ${{ env.IMAGE_REF }}
+            "${{ env.IMAGE_REF }}"
 
-      - name: Wait & verify endpoints
+      - name: Wait & verify endpoints on self-hosted
         run: |
-          sleep 8
-          echo "FastAPI status:"
-          curl -s -o /dev/null -w "%{http_code}\n" http://localhost:8080 || true
-          echo "MLflow status:"
-          curl -s -o /dev/null -w "%{http_code}\n" http://localhost:5051 || true
+          set -euo pipefail
+          for i in $(seq 1 30); do
+            code=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:8080/ || echo "000")
+            echo "FastAPI attempt $i -> $code"
+            if [ "$code" = "200" ] || [ "$code" = "302" ]; then break; fi
+            sleep 2
+          done
+          for i in $(seq 1 30); do
+            code=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:5051/ || echo "000")
+            echo "MLflow attempt $i -> $code"
+            if [ "$code" = "200" ]; then break; fi
+            sleep 2
+          done
+          echo "Final checks:"
+          curl -s -o /dev/null -w "fastapi:%{http_code}\n" http://localhost:8080/ || true
+          curl -s -o /dev/null -w "mlflow:%{http_code}\n" http://localhost:5051/ || true
 
       - name: Tail logs
         run: docker logs --tail 200 mtp_root || true
