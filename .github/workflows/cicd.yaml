@@ -11,25 +11,43 @@ on:
         default: ''
 
 env:
-  IMAGE_REF: myorg/mtp:latest
-  IMAGE_NAME: myorg/mtp
+  # Default to your Docker Hub image (update if you push a different tag)
+  IMAGE_REF: sumitdoh/mtp:latest
+  IMAGE_NAME: sumitdoh/mtp
 
 jobs:
   pull-and-smoke:
     name: Pull image, run smoke test
     runs-on: ubuntu-latest
+    outputs:
+      IMAGE_USED: ${{ steps.set-image.outputs.image_used }}
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
 
       - name: Resolve IMAGE_REF (dispatch override)
+        id: resolve
         run: |
+          set -euo pipefail
           if [ "${{ github.event.inputs.image_ref }}" != "" ]; then
             echo "Using dispatch IMAGE_REF=${{ github.event.inputs.image_ref }}"
-            echo "IMAGE_REF=${{ github.event.inputs.image_ref }}" >> $GITHUB_ENV
+            echo "IMAGE_USED=${{ github.event.inputs.image_ref }}" >> $GITHUB_OUTPUT
           else
             echo "Using default IMAGE_REF=${{ env.IMAGE_REF }}"
+            echo "IMAGE_USED=${{ env.IMAGE_REF }}" >> $GITHUB_OUTPUT
+          fi
+
+      # Expose the resolved image as a named step output (compat for older runners)
+      - name: Set IMAGE_USED output (compat)
+        id: set-image
+        run: |
+          # read file written by previous step (GITHUB_OUTPUT contains IMAGE_USED)
+          # fallback: compute again
+          if [ "${{ github.event.inputs.image_ref }}" != "" ]; then
+            echo "::set-output name=image_used::${{ github.event.inputs.image_ref }}"
+          else
+            echo "::set-output name=image_used::${{ env.IMAGE_REF }}"
           fi
 
       - name: Log in to DockerHub
@@ -41,13 +59,15 @@ jobs:
       - name: Pull image (manual upload expected) and fail if missing
         run: |
           set -euo pipefail
-          echo "Pulling image $IMAGE_REF"
-          docker pull "$IMAGE_REF"
-          echo "Pulled $IMAGE_REF successfully"
+          IMAGE_TO_PULL="${{ steps.set-image.outputs.image_used }}"
+          echo "Pulling image ${IMAGE_TO_PULL}"
+          docker pull "${IMAGE_TO_PULL}"
+          echo "Pulled ${IMAGE_TO_PULL} successfully"
 
       - name: Run ephemeral container for quick smoke test (MLflow on 5051)
         run: |
           set -euo pipefail
+          IMAGE_TO_RUN="${{ steps.set-image.outputs.image_used }}"
           docker rm -f cicd_mtp_test 2>/dev/null || true
           docker run -d --name cicd_mtp_test \
             -e CHOWN_ON_START=1 \
@@ -57,7 +77,7 @@ jobs:
             -e MLFLOW_START_TIMEOUT=60 \
             -p 5051:5051 -p 8080:8080 \
             -v ${{ github.workspace }}/data:/app/data \
-            "$IMAGE_REF"
+            "${IMAGE_TO_RUN}"
 
       - name: Wait for FastAPI and MLflow to be healthy (retries)
         run: |
@@ -125,12 +145,14 @@ jobs:
       - name: Pull image on target (fail if not available)
         run: |
           set -euo pipefail
-          echo "Pulling image ${{ env.IMAGE_REF }}"
-          docker pull "${{ env.IMAGE_REF }}"
+          IMAGE_TO_DEPLOY="${{ needs.pull-and-smoke.outputs.IMAGE_USED }}"
+          echo "Pulling image ${IMAGE_TO_DEPLOY}"
+          docker pull "${IMAGE_TO_DEPLOY}"
 
       - name: Start new container (MLflow on host 5051)
         run: |
           set -euo pipefail
+          IMAGE_TO_DEPLOY="${{ needs.pull-and-smoke.outputs.IMAGE_USED }}"
           docker run -d --name mtp_root \
             -e CHOWN_ON_START=1 \
             -e DROP_TO_USER=1 \
@@ -139,7 +161,7 @@ jobs:
             -e MLFLOW_START_TIMEOUT=120 \
             -p 5051:5051 -p 8080:8080 \
             -v /home/sweta/mtp/data:/app/data \
-            "${{ env.IMAGE_REF }}"
+            "${IMAGE_TO_DEPLOY}"
 
       - name: Wait & verify endpoints on self-hosted
         run: |
