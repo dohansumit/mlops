@@ -5,8 +5,10 @@ import os
 import sys
 import json
 from pathlib import Path
-from config import DATA_ROOT
+from .config import DATA_ROOT
 import pandas as pd
+
+
 
 app = FastAPI(title="Financial Sentiment API", version="1.0")
 

@@ -1,0 +1,41 @@
+/usr/local/lib/python3.10/site-packages/pydantic/_internal/_config.py:323: PydanticDeprecatedSince20: Support for class-based `config` is deprecated, use ConfigDict instead. Deprecated in Pydantic V2.0 to be removed in V3.0. See Pydantic V2 Migration Guide at https://errors.pydantic.dev/2.11/migration/
+  warnings.warn(DEPRECATION_MESSAGE, DeprecationWarning)
+INFO:     Uvicorn running on http://0.0.0.0:5050 (Press CTRL+C to quit)
+INFO:     Started parent process [631]
+INFO:     Started server process [635]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+INFO:     Started server process [636]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+INFO:     Started server process [633]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+INFO:     Started server process [634]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+INFO:     127.0.0.1:36316 - "GET / HTTP/1.1" 200 OK
+INFO:     172.17.0.1:36768 - "GET / HTTP/1.1" 304 Not Modified
+WARNING:root:Malformed experiment '0_meta_backup'. Detailed error Yaml file '/app/data/mlruns/0_meta_backup/meta.yaml' does not exist.
+Traceback (most recent call last):
+  File "/usr/local/lib/python3.10/site-packages/mlflow/store/tracking/file_store.py", line 367, in search_experiments
+    exp = self._get_experiment(exp_id, view_type)
+  File "/usr/local/lib/python3.10/site-packages/mlflow/store/tracking/file_store.py", line 465, in _get_experiment
+    meta = FileStore._read_yaml(experiment_dir, FileStore.META_DATA_FILE_NAME)
+  File "/usr/local/lib/python3.10/site-packages/mlflow/store/tracking/file_store.py", line 1635, in _read_yaml
+    return _read_helper(root, file_name, attempts_remaining=retries)
+  File "/usr/local/lib/python3.10/site-packages/mlflow/store/tracking/file_store.py", line 1628, in _read_helper
+    result = read_yaml(root, file_name)
+  File "/usr/local/lib/python3.10/site-packages/mlflow/utils/yaml_utils.py", line 107, in read_yaml
+    raise MissingConfigException(f"Yaml file '{file_path}' does not exist.")
+mlflow.exceptions.MissingConfigException: Yaml file '/app/data/mlruns/0_meta_backup/meta.yaml' does not exist.
+INFO:     172.17.0.1:36768 - "GET /ajax-api/2.0/mlflow/experiments/search?max_results=25&order_by=last_update_time+DESC HTTP/1.1" 200 OK
+INFO:     172.17.0.1:36768 - "POST /graphql HTTP/1.1" 200 OK
+INFO:     172.17.0.1:36768 - "POST /ajax-api/2.0/mlflow/experiments/search-datasets HTTP/1.1" 200 OK
+INFO:     172.17.0.1:36768 - "GET /ajax-api/2.0/mlflow/gateway-proxy?gateway_path=api%2F2.0%2Fendpoints%2F HTTP/1.1" 200 OK
+INFO:     172.17.0.1:36760 - "POST /ajax-api/2.0/mlflow/logged-models/search HTTP/1.1" 200 OK
+INFO:     172.17.0.1:36774 - "POST /ajax-api/2.0/mlflow/runs/search HTTP/1.1" 200 OK
+INFO:     172.17.0.1:36774 - "GET /ajax-api/2.0/mlflow/model-versions/search?filter=tags.%60mlflow.prompt.is_prompt%60+%3D+%27true%27+AND+tags.%60mlflow.prompt.run_ids%60+ILIKE+%22%25765fc14928744883a0958221c13839f4%25%22 HTTP/1.1" 200 OK
+INFO:     172.17.0.1:36760 - "GET /ajax-api/2.0/mlflow/model-versions/search?filter=run_id%3D%27765fc14928744883a0958221c13839f4%27 HTTP/1.1" 200 OK
+INFO:     172.17.0.1:52276 - "GET /ajax-api/2.0/mlflow/model-versions/search?filter=tags.%60mlflow.prompt.is_prompt%60+%3D+%27true%27+AND+tags.%60mlflow.prompt.run_ids%60+ILIKE+%22%25765fc14928744883a0958221c13839f4%25%22 HTTP/1.1" 200 OK
+INFO:     172.17.0.1:33610 - "GET /ajax-api/2.0/mlflow/model-versions/search?filter=tags.%60mlflow.prompt.is_prompt%60+%3D+%27true%27+AND+tags.%60mlflow.prompt.run_ids%60+ILIKE+%22%25765fc14928744883a0958221c13839f4%25%22 HTTP/1.1" 200 OK
