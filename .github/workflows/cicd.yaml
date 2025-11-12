@@ -23,21 +23,6 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Resolve IMAGE_REF (dispatch override)
-        id: resolve
-        run: |
-          set -euo pipefail
-          if [ "${{ github.event.inputs.image_ref }}" != "" ]; then
-            echo "Using dispatch IMAGE_REF=${{ github.event.inputs.image_ref }}"
-            echo "image_used=${{ github.event.inputs.image_ref }}" >> $GITHUB_OUTPUT
-          else
-            echo "Using default IMAGE_REF=${{ env.IMAGE_REF }}"
-            echo "image_used=${{ env.IMAGE_REF }}" >> $GITHUB_OUTPUT
-          fi
-
-      - name: Debug: show resolved image
-        run: echo "resolved image: '${{ steps.resolve.outputs.image_used }}'"
-
       - name: Prepare workspace data dir
         run: |
           set -euo pipefail
@@ -93,7 +78,12 @@ jobs:
       - name: Pull image (manual upload expected) and fail if missing
         run: |
           set -euo pipefail
-          IMAGE_TO_PULL="${{ steps.resolve.outputs.image_used }}"
+          # choose dispatch override if provided, otherwise use env IMAGE_REF
+          if [ "${{ github.event.inputs.image_ref }}" != "" ]; then
+            IMAGE_TO_PULL="${{ github.event.inputs.image_ref }}"
+          else
+            IMAGE_TO_PULL="${{ env.IMAGE_REF }}"
+          fi
           echo "Pulling image ${IMAGE_TO_PULL}"
           docker pull "${IMAGE_TO_PULL}"
           echo "Pulled ${IMAGE_TO_PULL} successfully"
@@ -101,7 +91,11 @@ jobs:
       - name: Run ephemeral container for quick smoke test (MLflow on 5051)
         run: |
           set -euo pipefail
-          IMAGE_TO_RUN="${{ steps.resolve.outputs.image_used }}"
+          if [ "${{ github.event.inputs.image_ref }}" != "" ]; then
+            IMAGE_TO_RUN="${{ github.event.inputs.image_ref }}"
+          else
+            IMAGE_TO_RUN="${{ env.IMAGE_REF }}"
+          fi
           docker rm -f cicd_mtp_test 2>/dev/null || true
           docker run -d --name cicd_mtp_test \
             -e CHOWN_ON_START=1 \
@@ -146,18 +140,6 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
-
-      - name: Resolve IMAGE_REF on deploy job (dispatch override)
-        id: resolve_deploy
-        run: |
-          set -euo pipefail
-          if [ "${{ github.event.inputs.image_ref }}" != "" ]; then
-            echo "Using dispatch IMAGE_REF=${{ github.event.inputs.image_ref }}"
-            echo "image_used=${{ github.event.inputs.image_ref }}" >> $GITHUB_OUTPUT
-          else
-            echo "Using default IMAGE_REF=${{ env.IMAGE_REF }}"
-            echo "image_used=${{ env.IMAGE_REF }}" >> $GITHUB_OUTPUT
-          fi
 
       - name: Print runner info (labels & name)
         run: |
@@ -232,17 +214,18 @@ jobs:
           set -euo pipefail
           docker login -u "${{ secrets.DOCKERHUB_USERNAME }}" -p "${{ secrets.DOCKERHUB_TOKEN }}"
 
-      - name: Pull image on target (fail if not available)
+      - name: Pull image on target (fail if not available) and start container
         run: |
           set -euo pipefail
-          IMAGE_TO_DEPLOY="${{ steps.resolve_deploy.outputs.image_used }}"
+          if [ "${{ github.event.inputs.image_ref }}" != "" ]; then
+            IMAGE_TO_DEPLOY="${{ github.event.inputs.image_ref }}"
+          else
+            IMAGE_TO_DEPLOY="${{ env.IMAGE_REF }}"
+          fi
           echo "Pulling image ${IMAGE_TO_DEPLOY}"
           docker pull "${IMAGE_TO_DEPLOY}"
 
-      - name: Start new container (MLflow on host 5051)
-        run: |
-          set -euo pipefail
-          IMAGE_TO_DEPLOY="${{ steps.resolve_deploy.outputs.image_used }}"
+          echo "Starting container mtp_root from ${IMAGE_TO_DEPLOY}"
           docker run -d --name mtp_root \
             -e CHOWN_ON_START=1 \
             -e DROP_TO_USER=1 \
