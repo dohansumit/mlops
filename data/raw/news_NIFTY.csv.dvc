@@ -1,0 +1,5 @@
+outs:
+- md5: 3302a03d2cdf00a628d77499d3afa9dc
+  size: 23840
+  hash: md5
+  path: news_NIFTY.csv
