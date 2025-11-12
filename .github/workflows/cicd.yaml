@@ -18,8 +18,6 @@ jobs:
   pull-and-smoke:
     name: Pull image, run smoke test
     runs-on: ubuntu-latest
-    outputs:
-      IMAGE_USED: ${{ steps.resolve.outputs.image_used }}
 
     steps:
       - name: Checkout repository
@@ -48,7 +46,6 @@ jobs:
           ls -la "${{ github.workspace }}" || true
 
       - name: Run repo scripts (ingestion, preprocess, model, app) on the runner BEFORE container
-        id: run-scripts
         run: |
           set -euo pipefail
           SCRIPTS_DIR="${{ github.workspace }}/scripts"
@@ -153,7 +150,7 @@ jobs:
           echo "GitHub runner labels: ${{ toJson(github.runner.labels) }}"
           echo "Runner name: ${{ github.runner.name || 'unknown' }}"
 
-      - name: Checkout repository (needed to access scripts)
+      - name: Checkout repository
         uses: actions/checkout@v4
 
       - name: Check required secrets are present
@@ -178,7 +175,7 @@ jobs:
           mkdir -p /home/sweta/mtp/data
           docker rm -f mtp_root 2>/dev/null || true
 
-      - name: Run repo scripts on self-hosted runner (prepare /home/sweta/mtp/data) BEFORE container
+      - name: Run repo scripts on self-hosted runner BEFORE container
         run: |
           set -euo pipefail
           SCRIPTS_DIR="${{ github.workspace }}/scripts"
@@ -227,14 +224,14 @@ jobs:
       - name: Pull image on target (fail if not available)
         run: |
           set -euo pipefail
-          IMAGE_TO_DEPLOY="${{ needs.pull-and-smoke.outputs.IMAGE_USED }}"
+          IMAGE_TO_DEPLOY="${{ env.IMAGE_REF }}"
           echo "Pulling image ${IMAGE_TO_DEPLOY}"
           docker pull "${IMAGE_TO_DEPLOY}"
 
-      - name: Start new container (MLflow on host 5051) and mount scripts
+      - name: Start new container (MLflow on host 5051)
         run: |
           set -euo pipefail
-          IMAGE_TO_DEPLOY="${{ needs.pull-and-smoke.outputs.IMAGE_USED }}"
+          IMAGE_TO_DEPLOY="${{ env.IMAGE_REF }}"
           docker run -d --name mtp_root \
             -e CHOWN_ON_START=1 \
             -e DROP_TO_USER=1 \
