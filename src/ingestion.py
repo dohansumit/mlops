@@ -3,6 +3,7 @@ import json
 import pandas as pd
 import feedparser
 import subprocess
+import os
 import sys
 from datetime import date
 from config import (
