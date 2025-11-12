@@ -36,8 +36,7 @@ jobs:
           fi
 
       - name: Debug: show resolved image
-        run: |
-          echo "resolved image: '${{ steps.resolve.outputs.image_used }}'"
+        run: echo "resolved image: '${{ steps.resolve.outputs.image_used }}'"
 
       - name: Prepare workspace data dir
         run: |
@@ -59,8 +58,8 @@ jobs:
           chmod -R +x "${SCRIPTS_DIR}" || true
 
           run_one() {
-            local name="$1"
-            local cmd="$2"
+            name="$1"
+            cmd="$2"
             echo "=== RUN ${name} ==="
             if [ ! -f "${cmd}" ]; then
               echo "WARN: ${cmd} not found; skipping ${name}"
@@ -145,13 +144,25 @@ jobs:
     runs-on: [self-hosted, Linux, X64]
 
     steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Resolve IMAGE_REF on deploy job (dispatch override)
+        id: resolve_deploy
+        run: |
+          set -euo pipefail
+          if [ "${{ github.event.inputs.image_ref }}" != "" ]; then
+            echo "Using dispatch IMAGE_REF=${{ github.event.inputs.image_ref }}"
+            echo "image_used=${{ github.event.inputs.image_ref }}" >> $GITHUB_OUTPUT
+          else
+            echo "Using default IMAGE_REF=${{ env.IMAGE_REF }}"
+            echo "image_used=${{ env.IMAGE_REF }}" >> $GITHUB_OUTPUT
+          fi
+
       - name: Print runner info (labels & name)
         run: |
           echo "GitHub runner labels: ${{ toJson(github.runner.labels) }}"
           echo "Runner name: ${{ github.runner.name || 'unknown' }}"
-
-      - name: Checkout repository
-        uses: actions/checkout@v4
 
       - name: Check required secrets are present
         run: |
@@ -189,8 +200,8 @@ jobs:
           chmod -R +x "${SCRIPTS_DIR}" || true
 
           run_one() {
-            local name="$1"
-            local cmd="$2"
+            name="$1"
+            cmd="$2"
             echo "=== RUN ${name} (host) ==="
             if [ ! -f "${cmd}" ]; then
               echo "WARN: ${cmd} not found; skipping ${name}"
@@ -224,14 +235,14 @@ jobs:
       - name: Pull image on target (fail if not available)
         run: |
           set -euo pipefail
-          IMAGE_TO_DEPLOY="${{ env.IMAGE_REF }}"
+          IMAGE_TO_DEPLOY="${{ steps.resolve_deploy.outputs.image_used }}"
           echo "Pulling image ${IMAGE_TO_DEPLOY}"
           docker pull "${IMAGE_TO_DEPLOY}"
 
       - name: Start new container (MLflow on host 5051)
         run: |
           set -euo pipefail
-          IMAGE_TO_DEPLOY="${{ env.IMAGE_REF }}"
+          IMAGE_TO_DEPLOY="${{ steps.resolve_deploy.outputs.image_used }}"
           docker run -d --name mtp_root \
             -e CHOWN_ON_START=1 \
             -e DROP_TO_USER=1 \
