@@ -1,0 +1,5 @@
+outs:
+- md5: da5f6e9e3034aa3521140895a8544ec3
+  size: 199
+  hash: md5
+  path: ingestion_summary.json
