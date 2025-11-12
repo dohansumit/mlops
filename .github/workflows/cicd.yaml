@@ -1,1 +1,164 @@
-# (paste the YAML content exactly here)
+name: CI/CD - MTP Pull & Deploy (smoke test + deploy)
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+    inputs:
+      image_ref:
+        description: 'Image reference to pull (overrides default IMAGE_REF)'
+        required: false
+        default: ''
+
+env:
+  IMAGE_REF: myorg/mtp:latest
+  IMAGE_NAME: myorg/mtp
+
+jobs:
+  pull-and-smoke:
+    name: Pull image, run smoke test
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Resolve IMAGE_REF (dispatch override)
+        run: |
+          if [ "${{ github.event.inputs.image_ref }}" != "" ]; then
+            echo "Using dispatch IMAGE_REF=${{ github.event.inputs.image_ref }}"
+            echo "IMAGE_REF=${{ github.event.inputs.image_ref }}" >> $GITHUB_ENV
+          else
+            echo "Using default IMAGE_REF=${{ env.IMAGE_REF }}"
+          fi
+
+      - name: Log in to DockerHub
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Pull image (manual upload expected) and fail if missing
+        run: |
+          set -euo pipefail
+          echo "Pulling image $IMAGE_REF"
+          docker pull "$IMAGE_REF"
+          echo "Pulled $IMAGE_REF successfully"
+
+      - name: Run ephemeral container for quick smoke test (MLflow on 5051)
+        run: |
+          set -euo pipefail
+          docker rm -f cicd_mtp_test 2>/dev/null || true
+          docker run -d --name cicd_mtp_test \
+            -e CHOWN_ON_START=1 \
+            -e DROP_TO_USER=1 \
+            -e SKIP_TRAIN=1 \
+            -e MLFLOW_PORT=5051 \
+            -e MLFLOW_START_TIMEOUT=60 \
+            -p 5051:5051 -p 8080:8080 \
+            -v ${{ github.workspace }}/data:/app/data \
+            "$IMAGE_REF"
+
+      - name: Wait for FastAPI and MLflow to be healthy (retries)
+        run: |
+          set -euo pipefail
+          for i in $(seq 1 30); do
+            code=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:8080/ || echo "000")
+            echo "FastAPI attempt $i -> ${code}"
+            if [ "$code" = "200" ] || [ "$code" = "302" ]; then break; fi
+            sleep 2
+          done
+          for i in $(seq 1 30); do
+            code=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:5051/ || echo "000")
+            echo "MLflow attempt $i -> ${code}"
+            if [ "$code" = "200" ]; then break; fi
+            sleep 2
+          done
+          echo "Final checks:"
+          curl -s -o /dev/null -w "fastapi:%{http_code}\n" http://localhost:8080/ || true
+          curl -s -o /dev/null -w "mlflow:%{http_code}\n" http://localhost:5051/ || true
+
+      - name: Collect logs (last 200 lines) and cleanup
+        run: |
+          docker logs --tail 200 cicd_mtp_test || true
+          docker rm -f cicd_mtp_test || true
+
+  deploy-to-self-hosted:
+    name: Deploy to self-hosted runner (PowerEdge)
+    needs: pull-and-smoke
+    # Use 'self-hosted' (or change to [self-hosted,poweredge] if your runner has a custom 'poweredge' label)
+    runs-on: self-hosted
+
+    steps:
+      - name: Print runner info (labels & name)
+        run: |
+          echo "GitHub runner labels: ${{ toJson(github.runner.labels) }}"
+          echo "Runner name: ${{ github.runner.name || 'unknown' }}"
+
+      - name: Check required secrets are present
+        run: |
+          if [ -z "${{ secrets.DOCKERHUB_USERNAME }}" ] || [ -z "${{ secrets.DOCKERHUB_TOKEN }}" ]; then
+            echo "::error::Required DockerHub secrets not present. Failing deploy."
+            exit 1
+          fi
+          echo "Required secrets present."
+
+      - name: Ensure docker is present on self-hosted node
+        run: |
+          set -euo pipefail
+          if ! command -v docker >/dev/null 2>&1; then
+            echo "ERROR: docker not found on self-hosted runner"; exit 1
+          fi
+          echo "Docker present: $(docker --version)"
+
+      - name: Log in to DockerHub on target
+        run: |
+          set -euo pipefail
+          docker login -u "${{ secrets.DOCKERHUB_USERNAME }}" -p "${{ secrets.DOCKERHUB_TOKEN }}"
+
+      - name: Prepare host path & cleanup previous container
+        run: |
+          set -euo pipefail
+          mkdir -p /home/sweta/mtp/data
+          docker rm -f mtp_root 2>/dev/null || true
+
+      - name: Pull image on target (fail if not available)
+        run: |
+          set -euo pipefail
+          echo "Pulling image ${{ env.IMAGE_REF }}"
+          docker pull "${{ env.IMAGE_REF }}"
+
+      - name: Start new container (MLflow on host 5051)
+        run: |
+          set -euo pipefail
+          docker run -d --name mtp_root \
+            -e CHOWN_ON_START=1 \
+            -e DROP_TO_USER=1 \
+            -e SKIP_TRAIN=0 \
+            -e MLFLOW_PORT=5051 \
+            -e MLFLOW_START_TIMEOUT=120 \
+            -p 5051:5051 -p 8080:8080 \
+            -v /home/sweta/mtp/data:/app/data \
+            "${{ env.IMAGE_REF }}"
+
+      - name: Wait & verify endpoints on self-hosted
+        run: |
+          set -euo pipefail
+          for i in $(seq 1 30); do
+            code=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:8080/ || echo "000")
+            echo "FastAPI attempt $i -> $code"
+            if [ "$code" = "200" ] || [ "$code" = "302" ]; then break; fi
+            sleep 2
+          done
+          for i in $(seq 1 30); do
+            code=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:5051/ || echo "000")
+            echo "MLflow attempt $i -> $code"
+            if [ "$code" = "200" ]; then break; fi
+            sleep 2
+          done
+          echo "Final checks:"
+          curl -s -o /dev/null -w "fastapi:%{http_code}\n" http://localhost:8080/ || true
+          curl -s -o /dev/null -w "mlflow:%{http_code}\n" http://localhost:5051/ || true
+
+      - name: Tail logs
+        run: docker logs --tail 200 mtp_root || true
