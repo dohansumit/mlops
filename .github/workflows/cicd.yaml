@@ -19,8 +19,9 @@ jobs:
   pull-and-smoke:
     name: Pull image, run smoke test
     runs-on: ubuntu-latest
+    # expose job output from the resolve step
     outputs:
-      IMAGE_USED: ${{ steps.set-image.outputs.image_used }}
+      IMAGE_USED: ${{ steps.resolve.outputs.image_used }}
 
     steps:
       - name: Checkout repository
@@ -32,21 +33,15 @@ jobs:
           set -euo pipefail
           if [ "${{ github.event.inputs.image_ref }}" != "" ]; then
             echo "Using dispatch IMAGE_REF=${{ github.event.inputs.image_ref }}"
-            echo "IMAGE_USED=${{ github.event.inputs.image_ref }}" >> $GITHUB_OUTPUT
+            echo "image_used=${{ github.event.inputs.image_ref }}" >> $GITHUB_OUTPUT
           else
             echo "Using default IMAGE_REF=${{ env.IMAGE_REF }}"
-            echo "IMAGE_USED=${{ env.IMAGE_REF }}" >> $GITHUB_OUTPUT
+            echo "image_used=${{ env.IMAGE_REF }}" >> $GITHUB_OUTPUT
           fi
 
-      # Expose the resolved image as a named step output (compat for older runners)
-      - name: Set IMAGE_USED output (compat)
-        id: set-image
+      - name: Debug: show resolved image
         run: |
-          if [ "${{ github.event.inputs.image_ref }}" != "" ]; then
-            echo "::set-output name=image_used::${{ github.event.inputs.image_ref }}"
-          else
-            echo "::set-output name=image_used::${{ env.IMAGE_REF }}"
-          fi
+          echo "resolved image: '${{ steps.resolve.outputs.image_used }}'"
 
       - name: Prepare workspace data dir
         run: |
@@ -104,7 +99,7 @@ jobs:
       - name: Pull image (manual upload expected) and fail if missing
         run: |
           set -euo pipefail
-          IMAGE_TO_PULL="${{ steps.set-image.outputs.image_used }}"
+          IMAGE_TO_PULL="${{ steps.resolve.outputs.image_used }}"
           echo "Pulling image ${IMAGE_TO_PULL}"
           docker pull "${IMAGE_TO_PULL}"
           echo "Pulled ${IMAGE_TO_PULL} successfully"
@@ -112,7 +107,7 @@ jobs:
       - name: Run ephemeral container for quick smoke test (MLflow on 5051)
         run: |
           set -euo pipefail
-          IMAGE_TO_RUN="${{ steps.set-image.outputs.image_used }}"
+          IMAGE_TO_RUN="${{ steps.resolve.outputs.image_used }}"
           docker rm -f cicd_mtp_test 2>/dev/null || true
           docker run -d --name cicd_mtp_test \
             -e CHOWN_ON_START=1 \
