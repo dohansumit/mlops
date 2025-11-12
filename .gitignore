@@ -18,3 +18,4 @@ dist/
 build/
 *.egg-info/
 echo "actions-runner/" >> .gitignore
+actions-runner/
