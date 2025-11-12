@@ -1,0 +1,19 @@
+# Bytecode, envs
+__pycache__/
+*.pyc
+.env
+.env.*
+
+# DVC cache (local)
+.dvc/cache/
+
+# Data files - do NOT commit actual large data
+/data/raw/*.csv
+/data/raw/*.parquet
+/data/raw/*.zip
+
+# Common
+.ipynb_checkpoints/
+dist/
+build/
+*.egg-info/
