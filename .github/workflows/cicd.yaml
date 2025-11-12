@@ -216,12 +216,29 @@ jobs:
           SRC="${{ github.workspace }}/data/mlruns"
           DST="/home/sweta/mtp/data/mlruns"
           echo "Syncing ${SRC} -> ${DST}"
-          sudo mkdir -p "${DST}"
-          # rsync everything from CI workspace into host data (deletes extras in DST if needed)
-          sudo rsync -av --delete "${SRC}/" "${DST}/" || true
-          # ensure mlflow in container (uid 1000) can read/write files
-          sudo chown -R 1000:1000 /home/sweta/mtp/data
-          sudo chmod -R u+rwX /home/sweta/mtp/data
+
+          # If CI didn't produce mlruns, skip (don't fail deploy)
+          if [ ! -d "${SRC}" ]; then
+            echo "No mlruns in workspace (${SRC}) — skipping sync."
+            exit 0
+          fi
+
+          # Ensure destination exists and is writable by the runner user
+          mkdir -p "${DST}"
+          rsync -av --delete "${SRC}/" "${DST}/"
+
+          # If chown is needed (container's mlflow runs as uid 1000), try to set it.
+          # On self-hosted runner, the current user may have permission to chown; try it,
+          # but do not fail the job if it can't be changed (avoid sudo prompts).
+          if command -v chown >/dev/null 2>&1; then
+            echo "Attempting to chown ${DST} to uid 1000:1000 (if permitted)..."
+            chown -R 1000:1000 /home/sweta/mtp/data 2>/dev/null || echo "chown not permitted by current user — continuing"
+          fi
+
+          # Ensure basic permissions for readability
+          chmod -R u+rwX /home/sweta/mtp/data || true
+
+          echo "Sync step finished."
 
       - name: Log in to DockerHub on target
         run: |
