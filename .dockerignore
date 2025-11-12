@@ -1,0 +1,10 @@
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.git
+.dvc/cache/
+.env
+mlruns/
+data/raw/
+data/processed/
