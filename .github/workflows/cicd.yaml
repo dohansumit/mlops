@@ -232,41 +232,6 @@ jobs:
 
           echo "Host data dir and docker CLI checks passed (non-sudo)."
 
-      - name: Populate workspace with local DVC cache (from host)
-        run: |
-          set -euo pipefail
-          HOST_CACHE_DIR="/home/sweta/mtp/.dvc/cache"
-          WORKSPACE_CACHE_DIR="${{ github.workspace }}/.dvc/cache"
-          echo "HOST_CACHE_DIR=${HOST_CACHE_DIR}"
-          echo "WORKSPACE_CACHE_DIR=${WORKSPACE_CACHE_DIR}"
-          if [ ! -d "${HOST_CACHE_DIR}" ]; then
-            echo "::warning::Host DVC cache not found at ${HOST_CACHE_DIR}. Skipping cache copy."
-          else
-            mkdir -p "${WORKSPACE_CACHE_DIR}"
-            rsync -a --delete "${HOST_CACHE_DIR}/" "${WORKSPACE_CACHE_DIR}/"
-            echo "Copied DVC cache into workspace: $(du -sh "${WORKSPACE_CACHE_DIR}" 2>/dev/null || true)"
-            ls -la "${WORKSPACE_CACHE_DIR}" | sed -n '1,20p' || true
-          fi
-
-      - name: Install DVC on self-hosted runner (no sudo)
-        run: |
-          set -euo pipefail
-          python -m pip install --upgrade pip
-          pip install --no-cache-dir "dvc" || pip install dvc || true
-          dvc --version || true
-
-      - name: Restore DVC-tracked files from workspace cache
-        run: |
-          set -euo pipefail
-          cd "${{ github.workspace }}"
-          # Try checkout (uses local cache); fall back to dvc pull (if you later configure remotes)
-          if dvc checkout --force --quiet; then
-            echo "dvc checkout succeeded (used local cache)."
-          else
-            echo "dvc checkout failed; attempting dvc pull (may require remote configuration)..."
-            dvc pull -v || echo "dvc pull failed (no remote configured or inaccessible). Continuing..."
-          fi
-
       - name: Run repo scripts on self-hosted runner BEFORE container
         run: |
           set -euo pipefail
@@ -314,15 +279,20 @@ jobs:
           SRC="${{ github.workspace }}/data/mlruns"
           DST="/home/sweta/mtp/data/mlruns"
           echo "Syncing ${SRC} -> ${DST}"
+
           if [ ! -d "${SRC}" ]; then
             echo "No mlruns in workspace (${SRC}) — skipping sync."
             exit 0
           fi
+
           mkdir -p "${DST}"
           chmod -R u+rwX,g+rwX,o+rX "$(dirname "${DST}")" || true
+
           rsync -rlptD --no-owner --no-group --chmod=Du=rwx,Dgo=rx,Fu=rw,Fgo=r --delete "${SRC}/" "${DST}/" || true
+
           echo "Attempting to chown ${DST} to uid 1000:1000 (if permitted)..."
           chown -R 1000:1000 /home/sweta/mtp/data 2>/dev/null || echo "chown not permitted by current user — continuing"
+
           chmod -R u+rwX /home/sweta/mtp/data || true
           echo "Sync step finished."
 
@@ -351,6 +321,7 @@ jobs:
           fi
           echo "Pulling image ${IMAGE_TO_DEPLOY}"
           docker pull "${IMAGE_TO_DEPLOY}"
+
           echo "Starting container mtp_root from ${IMAGE_TO_DEPLOY} (running as root inside container)"
           docker run -d --name mtp_root \
             -e SKIP_TRAIN=0 \
