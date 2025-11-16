@@ -19,6 +19,10 @@ jobs:
     name: Pull image, run smoke test
     runs-on: ubuntu-latest
 
+    # Make mlflow write to workspace/data/mlruns on this runner
+    env:
+      MLFLOW_TRACKING_URI: "file:${{ github.workspace }}/data/mlruns"   # <<< CHANGED
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -50,7 +54,9 @@ jobs:
               echo "WARN: ${cmd} not found; skipping ${name}"
               return 0
             fi
-            if "${cmd}"; then
+            # ensure any scripts that use $DATA_DIR will see it
+            DATA_DIR="${DATA_DIR}" "${cmd}"
+            if [ $? -eq 0 ]; then
               echo "${name} ok at $(date -u)" > "${DATA_DIR}/.${name}_done"
               echo "=== ${name} SUCCEEDED ==="
             else
@@ -78,7 +84,6 @@ jobs:
       - name: Pull image (manual upload expected) and fail if missing
         run: |
           set -euo pipefail
-          # choose dispatch override if provided, otherwise use env IMAGE_REF
           if [ "${{ github.event.inputs.image_ref }}" != "" ]; then
             IMAGE_TO_PULL="${{ github.event.inputs.image_ref }}"
           else
@@ -137,6 +142,11 @@ jobs:
     needs: pull-and-smoke
     runs-on: [self-hosted, linux, x64]
 
+    # On the host we want MLflow to use the host path
+    env:
+      # this ensures any scripts run on the host that rely on MLFLOW_TRACKING_URI write to host path
+      MLFLOW_TRACKING_URI: "file:/home/sweta/mtp/data/mlruns"   # <<< CHANGED
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -189,7 +199,8 @@ jobs:
               echo "WARN: ${cmd} not found; skipping ${name}"
               return 0
             fi
-            DATA_DIR="${HOST_DATA_DIR}" ${cmd}
+            # export HOST_DATA_DIR so scripts can read it
+            HOST_DATA_DIR="${HOST_DATA_DIR}" DATA_DIR="${HOST_DATA_DIR}" ${cmd}
             rc=$?
             if [ $rc -eq 0 ]; then
               echo "${name} ok at $(date -u)" > "${HOST_DATA_DIR}/.${name}_done"
@@ -222,17 +233,16 @@ jobs:
             exit 0
           fi
 
-          # Ensure destination exists and is writable by the runner user
+          # Ensure destination exists and has permissive permissions
           mkdir -p "${DST}"
-          rsync -av --delete "${SRC}/" "${DST}/"
+          chmod -R u+rwX,g+rwX,o+rX "$(dirname "${DST}")" || true
+
+          # Use rsync but do NOT attempt to change owner/group (avoids chown/chgrp errors)
+          rsync -rlptD --no-owner --no-group --chmod=Du=rwx,Dgo=rx,Fu=rw,Fgo=r --delete "${SRC}/" "${DST}/" || true
 
           # If chown is needed (container's mlflow runs as uid 1000), try to set it.
-          # On self-hosted runner, the current user may have permission to chown; try it,
-          # but do not fail the job if it can't be changed (avoid sudo prompts).
-          if command -v chown >/dev/null 2>&1; then
-            echo "Attempting to chown ${DST} to uid 1000:1000 (if permitted)..."
-            chown -R 1000:1000 /home/sweta/mtp/data 2>/dev/null || echo "chown not permitted by current user — continuing"
-          fi
+          echo "Attempting to chown ${DST} to uid 1000:1000 (if permitted)..."
+          chown -R 1000:1000 /home/sweta/mtp/data 2>/dev/null || echo "chown not permitted by current user — continuing"
 
           # Ensure basic permissions for readability
           chmod -R u+rwX /home/sweta/mtp/data || true
