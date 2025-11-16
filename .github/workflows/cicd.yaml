@@ -1,9 +1,155 @@
+name: CI/CD - MTP Pull & Deploy (smoke test + deploy)
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+    inputs:
+      image_ref:
+        description: 'Image reference to pull (overrides default IMAGE_REF)'
+        required: false
+        default: ''
+
+env:
+  IMAGE_REF: sumitdoh/mtp:latest
+  IMAGE_NAME: sumitdoh/mtp
+
+jobs:
+  pull-and-smoke:
+    name: Pull image, run smoke test
+    runs-on: ubuntu-latest
+
+    env:
+      MLFLOW_TRACKING_URI: "file://${{ github.workspace }}/data/mlruns"
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Prepare workspace data dir
+        run: |
+          set -euo pipefail
+          mkdir -p "${{ github.workspace }}/data"
+          ls -la "${{ github.workspace }}" || true
+
+      - name: Install DVC (optional) and dvc pull
+        run: |
+          set -euo pipefail
+          python -m pip install --upgrade pip
+          pip install "dvc[s3]" || pip install dvc || true
+          if [ -f dvc.yaml ] || [ -f .dvc/config ]; then
+            echo "Running dvc pull to populate data (may require remote auth)..."
+            dvc pull -v || echo "dvc pull failed (continuing)"
+          else
+            echo "No DVC config found — skipping dvc pull"
+          fi
+
+      - name: Run repo scripts (ingestion, preprocess, model, app) on the runner BEFORE container
+        run: |
+          set -euo pipefail
+          SCRIPTS_DIR="${{ github.workspace }}/scripts"
+          DATA_DIR="${{ github.workspace }}/data"
+          mkdir -p "${DATA_DIR}"
+          echo "Looking for scripts in ${SCRIPTS_DIR}"
+          if [ ! -d "${SCRIPTS_DIR}" ]; then
+            echo "No scripts/ directory found in repo; skipping script-run step."
+            exit 0
+          fi
+          chmod -R +x "${SCRIPTS_DIR}" || true
+
+          run_one() {
+            name="$1"
+            cmd="$2"
+            echo "=== RUN ${name} ==="
+            if [ ! -f "${cmd}" ]; then
+              echo "WARN: ${cmd} not found; skipping ${name}"
+              return 0
+            fi
+            DATA_DIR="${DATA_DIR}" "${cmd}"
+            if [ $? -eq 0 ]; then
+              echo "${name} ok at $(date -u)" > "${DATA_DIR}/.${name}_done"
+              echo "=== ${name} SUCCEEDED ==="
+            else
+              echo "${name} FAILED at $(date -u)" > "${DATA_DIR}/.${name}_failed"
+              echo "=== ${name} FAILED ===" >&2
+              tail -n 200 "${DATA_DIR}"/* || true
+              exit 1
+            fi
+          }
+
+          run_one "ingestion"  "${SCRIPTS_DIR}/ingestion.sh"
+          run_one "preprocess" "${SCRIPTS_DIR}/preprocess.sh"
+          run_one "model"      "${SCRIPTS_DIR}/model.sh"
+          run_one "app"        "${SCRIPTS_DIR}/app.sh"
+
+          echo "Script-run finished. Marker files in ${DATA_DIR}:"
+          ls -la "${DATA_DIR}" | sed -n '1,200p' || true
+
+      - name: Log in to DockerHub
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Pull image (manual upload expected) and fail if missing
+        run: |
+          set -euo pipefail
+          if [ "${{ github.event.inputs.image_ref }}" != "" ]; then
+            IMAGE_TO_PULL="${{ github.event.inputs.image_ref }}"
+          else
+            IMAGE_TO_PULL="${{ env.IMAGE_REF }}"
+          fi
+          echo "Pulling image ${IMAGE_TO_PULL}"
+          docker pull "${IMAGE_TO_PULL}"
+          echo "Pulled ${IMAGE_TO_PULL} successfully"
+
+      - name: Run ephemeral container for quick smoke test (MLflow on 5051)
+        run: |
+          set -euo pipefail
+          if [ "${{ github.event.inputs.image_ref }}" != "" ]; then
+            IMAGE_TO_RUN="${{ github.event.inputs.image_ref }}"
+          else
+            IMAGE_TO_RUN="${{ env.IMAGE_REF }}"
+          fi
+          docker rm -f cicd_mtp_test 2>/dev/null || true
+          docker run -d --name cicd_mtp_test \
+            -e SKIP_TRAIN=1 \
+            -e MLFLOW_PORT=5051 \
+            -e MLFLOW_START_TIMEOUT=60 \
+            -p 5051:5051 -p 8080:8080 \
+            -v "${{ github.workspace }}/data":/app/data \
+            -v "${{ github.workspace }}/scripts":/app/scripts \
+            "${IMAGE_TO_RUN}"
+
+      - name: Wait for FastAPI and MLflow to be healthy (retries)
+        run: |
+          set -euo pipefail
+          for i in $(seq 1 30); do
+            code=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:8080/ || echo "000")
+            echo "FastAPI attempt $i -> ${code}"
+            if [ "$code" = "200" ] || [ "$code" = "302" ]; then break; fi
+            sleep 2
+          done
+          for i in $(seq 1 30); do
+            code=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:5051/ || echo "000")
+            echo "MLflow attempt $i -> ${code}"
+            if [ "$code" = "200" ]; then break; fi
+            sleep 2
+          done
+          echo "Final checks:"
+          curl -s -o /dev/null -w "fastapi:%{http_code}\n" http://localhost:8080/ || true
+          curl -s -o /dev/null -w "mlflow:%{http_code}\n" http://localhost:5051/ || true
+
+      - name: Collect logs (last 200 lines) and cleanup
+        run: |
+          docker logs --tail 200 cicd_mtp_test || true
+          docker rm -f cicd_mtp_test || true
+
   deploy-to-self-hosted:
     name: Deploy to self-hosted runner (PowerEdge)
     needs: pull-and-smoke
     runs-on: [self-hosted, linux, x64]
 
-    # On the host we want MLflow to use the host path (absolute)
     env:
       MLFLOW_TRACKING_URI: "file:///home/sweta/mtp/data/mlruns"
 
@@ -51,10 +197,8 @@
           TARGET_DIR=/home/sweta/mtp/data
           echo "Checking ${TARGET_DIR} (non-sudo attempt)..."
 
-          # Try to create the directory as the current runner user
           mkdir -p "${TARGET_DIR}" || true
 
-          # Try to write a temp file to test writability
           TMPFILE="${TARGET_DIR}/.ci_write_test_$RANDOM"
           if ! printf "ok" > "${TMPFILE}" 2>/dev/null; then
             echo "::error::${TARGET_DIR} is NOT writable by $(id -un)."
@@ -71,18 +215,15 @@
             echo "After applying the above, re-run this workflow."
             exit 1
           else
-            # cleanup tmp file
             rm -f "${TMPFILE}"
             echo "${TARGET_DIR} is writable by $(id -un)."
           fi
 
-          # Ensure docker is available to runner user (no sudo)
           if ! command -v docker >/dev/null 2>&1; then
             echo "::error::docker CLI is not installed on the host or not in PATH for runner user."
             exit 1
           fi
 
-          # Check the runner user can run docker ps (no sudo)
           if ! docker ps -q >/dev/null 2>&1; then
             echo "::warning::Runner user cannot run 'docker ps' without sudo. Ensure runner user is in docker group."
             echo "You can check group membership with: id -nG $(id -un)"
