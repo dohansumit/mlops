@@ -1,5 +1,6 @@
 outs:
-- md5: 4d613ade1f86010ca3b4b0e2ee0141e8
+- md5: 3f8d021a9faf99bbecb4439e64893e9a
   size: 29812
   hash: md5
   path: processed_news_2025-11-16.csv
+  isexec: true
