@@ -1,75 +1,20 @@
 /usr/local/lib/python3.10/site-packages/pydantic/_internal/_config.py:323: PydanticDeprecatedSince20: Support for class-based `config` is deprecated, use ConfigDict instead. Deprecated in Pydantic V2.0 to be removed in V3.0. See Pydantic V2 Migration Guide at https://errors.pydantic.dev/2.11/migration/
   warnings.warn(DEPRECATION_MESSAGE, DeprecationWarning)
-INFO:     Uvicorn running on http://0.0.0.0:5051 (Press CTRL+C to quit)
+INFO:     Uvicorn running on http://0.0.0.0:5050 (Press CTRL+C to quit)
 INFO:     Started parent process [152]
-INFO:     Started server process [154]
+INFO:     Started server process [157]
 INFO:     Waiting for application startup.
 INFO:     Application startup complete.
-INFO:     Started server process [155]
+INFO:     Started server process [154]
 INFO:     Waiting for application startup.
 INFO:     Application startup complete.
 INFO:     Started server process [156]
 INFO:     Waiting for application startup.
 INFO:     Application startup complete.
-INFO:     Started server process [157]
+INFO:     Started server process [155]
 INFO:     Waiting for application startup.
 INFO:     Application startup complete.
-INFO:     127.0.0.1:42394 - "GET / HTTP/1.1" 200 OK
-INFO:     172.17.0.1:46416 - "GET / HTTP/1.1" 200 OK
-INFO:     172.17.0.1:46422 - "GET / HTTP/1.1" 200 OK
-INFO:     172.27.11.54:56117 - "GET / HTTP/1.1" 200 OK
-INFO:     172.27.11.54:56117 - "GET /static-files/static/js/main.3d375fe3.js HTTP/1.1" 200 OK
-INFO:     172.27.11.54:57632 - "GET /static-files/static/css/main.f1270cf7.css HTTP/1.1" 200 OK
-INFO:     172.27.11.54:56117 - "GET /static-files/static/js/9478.cbf55ef3.chunk.js HTTP/1.1" 200 OK
-INFO:     172.27.11.54:56117 - "GET /static-files/static/js/618.eccaaac3.chunk.js HTTP/1.1" 200 OK
-INFO:     172.27.11.54:57632 - "GET /static-files/static/css/3044.41bf106c.chunk.css HTTP/1.1" 200 OK
-INFO:     172.27.11.54:61097 - "GET /static-files/static/js/3044.8a4b59f2.chunk.js HTTP/1.1" 200 OK
-WARNING:root:Malformed experiment '0_meta_backup'. Detailed error Yaml file '/app/data/mlruns/0_meta_backup/meta.yaml' does not exist.
-Traceback (most recent call last):
-  File "/usr/local/lib/python3.10/site-packages/mlflow/store/tracking/file_store.py", line 367, in search_experiments
-    exp = self._get_experiment(exp_id, view_type)
-  File "/usr/local/lib/python3.10/site-packages/mlflow/store/tracking/file_store.py", line 465, in _get_experiment
-    meta = FileStore._read_yaml(experiment_dir, FileStore.META_DATA_FILE_NAME)
-  File "/usr/local/lib/python3.10/site-packages/mlflow/store/tracking/file_store.py", line 1635, in _read_yaml
-    return _read_helper(root, file_name, attempts_remaining=retries)
-  File "/usr/local/lib/python3.10/site-packages/mlflow/store/tracking/file_store.py", line 1628, in _read_helper
-    result = read_yaml(root, file_name)
-  File "/usr/local/lib/python3.10/site-packages/mlflow/utils/yaml_utils.py", line 107, in read_yaml
-    raise MissingConfigException(f"Yaml file '{file_path}' does not exist.")
-mlflow.exceptions.MissingConfigException: Yaml file '/app/data/mlruns/0_meta_backup/meta.yaml' does not exist.
-INFO:     172.27.11.54:61097 - "GET /ajax-api/2.0/mlflow/experiments/search?max_results=25&order_by=last_update_time+DESC HTTP/1.1" 200 OK
-INFO:     172.27.11.54:61097 - "GET /static-files/static/js/7027.6961c163.chunk.js HTTP/1.1" 200 OK
-INFO:     172.27.11.54:57632 - "GET /static-files/static/js/2079.456be601.chunk.js HTTP/1.1" 200 OK
-INFO:     172.27.11.54:56117 - "GET /static-files/static/js/4175.8b841372.chunk.js HTTP/1.1" 200 OK
-INFO:     172.27.11.54:50214 - "GET /static-files/static/js/4153.af01f731.chunk.js HTTP/1.1" 200 OK
-INFO:     172.27.11.54:50760 - "GET /static-files/static/js/5879.8c03c3a7.chunk.js HTTP/1.1" 200 OK
-INFO:     172.27.11.54:57010 - "GET /static-files/static/css/experimentPage.b886c467.chunk.css HTTP/1.1" 200 OK
-INFO:     172.27.11.54:57632 - "GET /static-files/static/js/2134.88c9cfcf.chunk.js HTTP/1.1" 200 OK
-INFO:     172.27.11.54:61097 - "GET /static-files/static/js/2231.5a7fbe5e.chunk.js HTTP/1.1" 200 OK
-INFO:     172.27.11.54:50214 - "GET /static-files/static/js/3067.3b0c5ce8.chunk.js HTTP/1.1" 200 OK
-INFO:     172.27.11.54:57010 - "GET /static-files/static/js/2121.02d55e17.chunk.js HTTP/1.1" 200 OK
-INFO:     172.27.11.54:56117 - "GET /static-files/static/js/1240.bbfffe0d.chunk.js HTTP/1.1" 200 OK
-INFO:     172.27.11.54:61097 - "GET /static-files/static/js/7816.b5c1abd2.chunk.js HTTP/1.1" 200 OK
-INFO:     172.27.11.54:56117 - "GET /static-files/static/js/1107.c4dd9cf4.chunk.js HTTP/1.1" 200 OK
-INFO:     172.27.11.54:50214 - "GET /static-files/static/js/2587.5e59ba3b.chunk.js HTTP/1.1" 200 OK
-INFO:     172.27.11.54:56117 - "GET /static-files/static/js/3428.60ccdc4b.chunk.js HTTP/1.1" 200 OK
-INFO:     172.27.11.54:50214 - "GET /static-files/static/js/9721.bf5e859c.chunk.js HTTP/1.1" 200 OK
-INFO:     172.27.11.54:57010 - "GET /static-files/static/js/5813.33361779.chunk.js HTTP/1.1" 200 OK
-INFO:     172.27.11.54:50214 - "GET /static-files/static/js/3285.a7b8bac8.chunk.js HTTP/1.1" 200 OK
-INFO:     172.27.11.54:61097 - "GET /static-files/static/js/9640.bcf803af.chunk.js HTTP/1.1" 200 OK
-INFO:     172.27.11.54:57010 - "GET /static-files/static/js/590.b19ebea6.chunk.js HTTP/1.1" 200 OK
-INFO:     172.27.11.54:50760 - "GET /static-files/static/js/3270.96fc46a3.chunk.js HTTP/1.1" 200 OK
-INFO:     172.27.11.54:50214 - "GET /static-files/static/js/experimentPage.4d96c43c.chunk.js HTTP/1.1" 200 OK
-INFO:     172.27.11.54:56117 - "GET /static-files/static/js/7715.1060ceb2.chunk.js HTTP/1.1" 200 OK
-INFO:     172.27.11.54:57632 - "POST /graphql HTTP/1.1" 200 OK
-INFO:     172.27.11.54:57632 - "GET /static-files/static/css/505.1c6f09d6.chunk.css HTTP/1.1" 200 OK
-INFO:     172.27.11.54:50760 - "GET /static-files/static/js/505.b78801d2.chunk.js HTTP/1.1" 200 OK
-INFO:     172.27.11.54:50760 - "POST /ajax-api/2.0/mlflow/experiments/search-datasets HTTP/1.1" 200 OK
-INFO:     172.27.11.54:57632 - "GET /static-files/static/js/1570.e6a5ccf7.chunk.js HTTP/1.1" 200 OK
-INFO:     172.27.11.54:50760 - "GET /static-files/static/css/1570.21d39143.chunk.css HTTP/1.1" 200 OK
-INFO:     172.27.11.54:56117 - "GET /static-files/static/js/2402.1c147bbf.chunk.js HTTP/1.1" 200 OK
-INFO:     172.27.11.54:50214 - "GET /ajax-api/2.0/mlflow/gateway-proxy?gateway_path=api%2F2.0%2Fendpoints%2F HTTP/1.1" 200 OK
-INFO:     172.27.11.54:57010 - "POST /ajax-api/2.0/mlflow/logged-models/search HTTP/1.1" 200 OK
-INFO:     172.27.11.54:61097 - "POST /ajax-api/2.0/mlflow/runs/search HTTP/1.1" 200 OK
-INFO:     172.27.11.54:54067 - "POST /ajax-api/2.0/mlflow/runs/search HTTP/1.1" 200 OK
-INFO:     172.27.11.54:63570 - "POST /ajax-api/2.0/mlflow/runs/search HTTP/1.1" 200 OK
+INFO:     127.0.0.1:39550 - "GET / HTTP/1.1" 200 OK
+INFO:     172.17.0.1:46066 - "GET / HTTP/1.1" 200 OK
+INFO:     172.17.0.1:51134 - "GET / HTTP/1.1" 200 OK
+INFO:     172.17.0.1:51140 - "GET / HTTP/1.1" 200 OK

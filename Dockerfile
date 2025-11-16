@@ -19,11 +19,11 @@ ENV SKIP_TRAIN=0
 WORKDIR /app
 
 # -------------------------
-# System packages
+# System packages (include iproute2 for `ss`)
 # -------------------------
 RUN apt-get update \
     && apt-get install -y --no-install-recommends \
-       git curl bash build-essential procps ca-certificates sudo \
+       git curl bash build-essential procps ca-certificates sudo iproute2 \
     && rm -rf /var/lib/apt/lists/*
 
 # -------------------------
@@ -55,6 +55,8 @@ EXPOSE ${MLFLOW_PORT}
 
 # -------------------------
 # Entrypoint Script (robust: starts MLflow, waits for HTTP 200 on /, then starts API)
+# - Respects MLFLOW_TRACKING_URI if provided (file:// or path)
+# - run-pipeline now runs ingestion->preprocess->model -> starts mlflow -> starts FastAPI
 # -------------------------
 RUN mkdir -p /usr/local/bin
 RUN cat > /usr/local/bin/fullpipeline-entrypoint.sh <<'EOF'
@@ -82,14 +84,47 @@ USERNAME="${USERNAME:-mlflow}"
 # How long to wait for MLflow to become healthy (seconds)
 MLFLOW_START_TIMEOUT="${MLFLOW_START_TIMEOUT:-60}"
 
+# If MLFLOW_TRACKING_URI is provided, prefer it and derive a usable path.
+# Accepts: file:///abs/path  , file:/abs/path  , or /abs/path
+if [ -n "${MLFLOW_TRACKING_URI:-}" ]; then
+  uri="${MLFLOW_TRACKING_URI}"
+  if echo "$uri" | grep -q "^file://"; then
+    # strip leading file:// to get local path
+    derived_dir="$(echo "$uri" | sed -e 's|^file://||')"
+  elif echo "$uri" | grep -q "^file:"; then
+    derived_dir="$(echo "$uri" | sed -e 's|^file:||')"
+  else
+    derived_dir="$uri"
+  fi
+  # normalize path if possible
+  if command -v readlink >/dev/null 2>&1; then
+    derived_dir="$(readlink -f "${derived_dir}")"
+  fi
+  # update MLFLOW_DIR so other parts of script use same location
+  MLFLOW_DIR="${derived_dir:-${MLFLOW_DIR}}"
+fi
+
 cmd="${1:-start}"
 
 function start_mlflow_and_wait() {
   mkdir -p "${MLFLOW_DIR}" "${DATA_ROOT}"
-  echo "🚀 Starting MLflow tracking server on port ${MLFLOW_PORT} (backend: ${MLFLOW_DIR})..."
+
+  # decide backend uri: prefer explicit MLFLOW_TRACKING_URI (if present),
+  # otherwise use file://${MLFLOW_DIR}
+  if [ -n "${MLFLOW_TRACKING_URI:-}" ]; then
+    backend_uri="${MLFLOW_TRACKING_URI}"
+    # ensure file:// prefix if user supplied a plain path
+    if ! echo "$backend_uri" | grep -q "^file:"; then
+      backend_uri="file://${backend_uri}"
+    fi
+  else
+    backend_uri="file://${MLFLOW_DIR}"
+  fi
+
+  echo "🚀 Starting MLflow tracking server on port ${MLFLOW_PORT} (backend: ${backend_uri})..."
   nohup mlflow server \
-    --backend-store-uri "file://${MLFLOW_DIR}" \
-    --default-artifact-root "file://${MLFLOW_DIR}" \
+    --backend-store-uri "${backend_uri}" \
+    --default-artifact-root "${backend_uri}" \
     --host 0.0.0.0 \
     --port "${MLFLOW_PORT}" > "${LOG_FILE}" 2>&1 &
 
@@ -104,7 +139,7 @@ function start_mlflow_and_wait() {
       return 0
     fi
     # if root not yet 200, check if the port is listening (indicates process is up)
-    if ss -ltn | grep -q ":${MLFLOW_PORT}"; then
+    if command -v ss >/dev/null 2>&1 && ss -ltn | grep -q ":${MLFLOW_PORT}"; then
       echo "ℹ️ Port ${MLFLOW_PORT} is listening (process up) but root not yet 200; continuing to wait..."
     fi
     sleep 1
@@ -123,14 +158,31 @@ case "${cmd}" in
 
   run-pipeline)
     mkdir -p "${DATA_ROOT}"
+
     echo "🏗️ Running ingestion..."
     python -u src/ingestion.py || { echo "❌ Ingestion failed"; exit 1; }
+
     echo "🧹 Running preprocessing..."
     python -u src/preprocess.py || { echo "❌ Preprocessing failed"; exit 1; }
+
     echo "🤖 Training model..."
     python -u src/model.py || { echo "❌ Model training failed"; exit 1; }
+
     echo "✅ Pipeline completed."
-    exit 0
+
+    # After pipeline, start MLflow and then start the FastAPI app so the container remains running
+    if ! start_mlflow_and_wait; then
+      echo "⚠️ Aborting run-pipeline due to MLflow readiness failure." >&2
+      exit 1
+    fi
+
+    echo "🚀 Starting FastAPI app (after pipeline) on port ${API_PORT}..."
+    if [ "${DROP_TO_USER}" = "1" ]; then
+      echo "➡️ DROP_TO_USER=1 -> dropping to user ${USERNAME} (uid:${USER_UID}) to run uvicorn"
+      exec su -s /bin/bash -c "exec uvicorn src.app:app --host 0.0.0.0 --port \"${API_PORT}\"" ${USERNAME}
+    else
+      exec uvicorn src.app:app --host 0.0.0.0 --port "${API_PORT}"
+    fi
     ;;
 
   start)

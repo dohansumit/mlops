@@ -21,7 +21,7 @@ jobs:
 
     # Make mlflow write to workspace/data/mlruns on this runner
     env:
-      MLFLOW_TRACKING_URI: "file:${{ github.workspace }}/data/mlruns"   # <<< CHANGED
+      MLFLOW_TRACKING_URI: "file:${{ github.workspace }}/data/mlruns"
 
     steps:
       - name: Checkout repository
@@ -145,7 +145,7 @@ jobs:
     # On the host we want MLflow to use the host path
     env:
       # this ensures any scripts run on the host that rely on MLFLOW_TRACKING_URI write to host path
-      MLFLOW_TRACKING_URI: "file:/home/sweta/mtp/data/mlruns"   # <<< CHANGED
+      MLFLOW_TRACKING_URI: "file:/home/sweta/mtp/data/mlruns"
 
     steps:
       - name: Checkout repository
@@ -177,6 +177,16 @@ jobs:
           set -euo pipefail
           mkdir -p /home/sweta/mtp/data
           docker rm -f mtp_root 2>/dev/null || true
+
+      - name: Ensure host data dir exists and is owned by runner user (needs sudo)   # <<< NEW
+        run: |
+          set -euo pipefail
+          echo "Ensuring /home/sweta/mtp/data exists and is owned by 'sweta' (requires sudo)..."
+          sudo mkdir -p /home/sweta/mtp/data
+          # make the runner user 'sweta' owner so subsequent steps & containers can read/write
+          sudo chown -R sweta:sweta /home/sweta/mtp/data
+          sudo chmod -R 775 /home/sweta/mtp/data
+          echo "Ownership and permissions set on /home/sweta/mtp/data"
 
       - name: Run repo scripts on self-hosted runner BEFORE container
         run: |
