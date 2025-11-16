@@ -1,21 +1,29 @@
 /usr/local/lib/python3.10/site-packages/pydantic/_internal/_config.py:323: PydanticDeprecatedSince20: Support for class-based `config` is deprecated, use ConfigDict instead. Deprecated in Pydantic V2.0 to be removed in V3.0. See Pydantic V2 Migration Guide at https://errors.pydantic.dev/2.11/migration/
   warnings.warn(DEPRECATION_MESSAGE, DeprecationWarning)
-INFO:     Uvicorn running on http://0.0.0.0:5050 (Press CTRL+C to quit)
-INFO:     Started parent process [631]
-INFO:     Started server process [636]
+INFO:     Uvicorn running on http://0.0.0.0:5051 (Press CTRL+C to quit)
+INFO:     Started parent process [156]
+INFO:     Started server process [158]
 INFO:     Waiting for application startup.
 INFO:     Application startup complete.
-INFO:     Started server process [635]
+INFO:     Started server process [159]
 INFO:     Waiting for application startup.
 INFO:     Application startup complete.
-INFO:     Started server process [634]
+INFO:     Started server process [160]
 INFO:     Waiting for application startup.
 INFO:     Application startup complete.
-INFO:     Started server process [633]
+INFO:     Started server process [161]
 INFO:     Waiting for application startup.
 INFO:     Application startup complete.
-INFO:     127.0.0.1:35986 - "GET / HTTP/1.1" 200 OK
-INFO:     172.17.0.1:57324 - "GET / HTTP/1.1" 304 Not Modified
+INFO:     127.0.0.1:58932 - "GET / HTTP/1.1" 200 OK
+INFO:     172.17.0.1:49666 - "GET / HTTP/1.1" 200 OK
+INFO:     172.17.0.1:49678 - "GET / HTTP/1.1" 200 OK
+INFO:     172.21.12.199:53781 - "GET / HTTP/1.1" 200 OK
+INFO:     172.21.12.199:53781 - "GET /static-files/static/js/main.3d375fe3.js HTTP/1.1" 200 OK
+INFO:     172.21.12.199:60351 - "GET /static-files/static/css/main.f1270cf7.css HTTP/1.1" 200 OK
+INFO:     172.21.12.199:53781 - "GET /static-files/static/js/9478.cbf55ef3.chunk.js HTTP/1.1" 200 OK
+INFO:     172.21.12.199:53781 - "GET /static-files/static/js/618.eccaaac3.chunk.js HTTP/1.1" 200 OK
+INFO:     172.21.12.199:60351 - "GET /static-files/static/css/3044.41bf106c.chunk.css HTTP/1.1" 200 OK
+INFO:     172.21.12.199:50181 - "GET /static-files/static/js/3044.8a4b59f2.chunk.js HTTP/1.1" 200 OK
 WARNING:root:Malformed experiment '0_meta_backup'. Detailed error Yaml file '/app/data/mlruns/0_meta_backup/meta.yaml' does not exist.
 Traceback (most recent call last):
   File "/usr/local/lib/python3.10/site-packages/mlflow/store/tracking/file_store.py", line 367, in search_experiments
@@ -29,30 +37,81 @@ Traceback (most recent call last):
   File "/usr/local/lib/python3.10/site-packages/mlflow/utils/yaml_utils.py", line 107, in read_yaml
     raise MissingConfigException(f"Yaml file '{file_path}' does not exist.")
 mlflow.exceptions.MissingConfigException: Yaml file '/app/data/mlruns/0_meta_backup/meta.yaml' does not exist.
-INFO:     172.17.0.1:57324 - "GET /ajax-api/2.0/mlflow/experiments/search?max_results=25&order_by=last_update_time+DESC HTTP/1.1" 200 OK
-INFO:     172.17.0.1:57324 - "POST /graphql HTTP/1.1" 200 OK
-INFO:     172.17.0.1:57324 - "POST /ajax-api/2.0/mlflow/experiments/search-datasets HTTP/1.1" 200 OK
-INFO:     172.17.0.1:57310 - "POST /ajax-api/2.0/mlflow/logged-models/search HTTP/1.1" 200 OK
-INFO:     172.17.0.1:57324 - "GET /ajax-api/2.0/mlflow/gateway-proxy?gateway_path=api%2F2.0%2Fendpoints%2F HTTP/1.1" 200 OK
-INFO:     172.17.0.1:57326 - "POST /ajax-api/2.0/mlflow/runs/search HTTP/1.1" 200 OK
-INFO:     172.17.0.1:36012 - "GET /static-files/static/js/2586.e6839fb7.chunk.js HTTP/1.1" 200 OK
-INFO:     172.17.0.1:35988 - "GET /static-files/static/js/7453.2ee01df4.chunk.js HTTP/1.1" 200 OK
-INFO:     172.17.0.1:35996 - "GET /static-files/static/css/8455.3cd9f5ca.chunk.css HTTP/1.1" 200 OK
-INFO:     172.17.0.1:36034 - "GET /static-files/static/js/701.e7dbd4d1.chunk.js HTTP/1.1" 200 OK
-INFO:     172.17.0.1:36026 - "GET /static-files/static/js/47.c3fdc3f4.chunk.js HTTP/1.1" 200 OK
-INFO:     172.17.0.1:35980 - "GET /static-files/static/js/2633.610c7275.chunk.js HTTP/1.1" 200 OK
-INFO:     172.17.0.1:36012 - "GET /static-files/static/js/8455.d8d24bfc.chunk.js HTTP/1.1" 200 OK
-INFO:     172.17.0.1:35996 - "GET /static-files/static/js/7364.b91e87c1.chunk.js HTTP/1.1" 200 OK
-INFO:     172.17.0.1:35980 - "GET /ajax-api/2.0/mlflow/model-versions/search?filter=run_id%3D%27a928a32d5f074097abda309f1376068b%27 HTTP/1.1" 200 OK
-INFO:     172.17.0.1:36012 - "GET /ajax-api/2.0/mlflow/model-versions/search?filter=tags.%60mlflow.prompt.is_prompt%60+%3D+%27true%27+AND+tags.%60mlflow.prompt.run_ids%60+ILIKE+%22%25a928a32d5f074097abda309f1376068b%25%22 HTTP/1.1" 200 OK
-INFO:     172.17.0.1:36012 - "GET /ajax-api/2.0/mlflow/model-versions/search?filter=tags.%60mlflow.prompt.is_prompt%60+%3D+%27true%27+AND+tags.%60mlflow.prompt.run_ids%60+ILIKE+%22%25a928a32d5f074097abda309f1376068b%25%22 HTTP/1.1" 200 OK
-INFO:     172.17.0.1:58208 - "GET /ajax-api/2.0/mlflow/model-versions/search?filter=tags.%60mlflow.prompt.is_prompt%60+%3D+%27true%27+AND+tags.%60mlflow.prompt.run_ids%60+ILIKE+%22%25a928a32d5f074097abda309f1376068b%25%22 HTTP/1.1" 200 OK
-INFO:     172.17.0.1:39148 - "GET /ajax-api/2.0/mlflow/model-versions/search?filter=tags.%60mlflow.prompt.is_prompt%60+%3D+%27true%27+AND+tags.%60mlflow.prompt.run_ids%60+ILIKE+%22%25765fc14928744883a0958221c13839f4%25%22 HTTP/1.1" 200 OK
-INFO:     172.17.0.1:56918 - "GET /ajax-api/2.0/mlflow/model-versions/search?filter=tags.%60mlflow.prompt.is_prompt%60+%3D+%27true%27+AND+tags.%60mlflow.prompt.run_ids%60+ILIKE+%22%25765fc14928744883a0958221c13839f4%25%22 HTTP/1.1" 200 OK
-INFO:     172.17.0.1:56918 - "GET /static-files/static/js/3464.b74283ee.chunk.js HTTP/1.1" 200 OK
-INFO:     172.17.0.1:56932 - "GET /static-files/static/css/301.ca66900f.chunk.css HTTP/1.1" 200 OK
-INFO:     172.17.0.1:56918 - "GET /static-files/static/js/301.78007945.chunk.js HTTP/1.1" 200 OK
-INFO:     172.17.0.1:56918 - "GET /ajax-api/2.0/mlflow/registered-models/search?filter=&max_results=25&order_by=name+ASC HTTP/1.1" 200 OK
+INFO:     172.21.12.199:50181 - "GET /ajax-api/2.0/mlflow/experiments/search?max_results=25&order_by=last_update_time+DESC HTTP/1.1" 200 OK
+INFO:     172.21.12.199:53781 - "GET /static-files/static/js/2079.456be601.chunk.js HTTP/1.1" 200 OK
+INFO:     172.21.12.199:50181 - "GET /static-files/static/js/7027.6961c163.chunk.js HTTP/1.1" 200 OK
+INFO:     172.21.12.199:60351 - "GET /static-files/static/js/4175.8b841372.chunk.js HTTP/1.1" 200 OK
+INFO:     172.21.12.199:63949 - "GET /static-files/static/css/experimentPage.b886c467.chunk.css HTTP/1.1" 200 OK
+INFO:     172.21.12.199:64473 - "GET /static-files/static/js/4153.af01f731.chunk.js HTTP/1.1" 200 OK
+INFO:     172.21.12.199:58453 - "GET /static-files/static/js/5879.8c03c3a7.chunk.js HTTP/1.1" 200 OK
+INFO:     172.21.12.199:53781 - "GET /static-files/static/js/2134.88c9cfcf.chunk.js HTTP/1.1" 200 OK
+INFO:     172.21.12.199:50181 - "GET /static-files/static/js/2231.5a7fbe5e.chunk.js HTTP/1.1" 200 OK
+INFO:     172.21.12.199:63949 - "GET /static-files/static/js/3067.3b0c5ce8.chunk.js HTTP/1.1" 200 OK
+INFO:     172.21.12.199:64473 - "GET /static-files/static/js/2121.02d55e17.chunk.js HTTP/1.1" 200 OK
+INFO:     172.21.12.199:60351 - "GET /static-files/static/js/1240.bbfffe0d.chunk.js HTTP/1.1" 200 OK
+INFO:     172.21.12.199:50181 - "GET /static-files/static/js/7816.b5c1abd2.chunk.js HTTP/1.1" 200 OK
+INFO:     172.21.12.199:60351 - "GET /static-files/static/js/1107.c4dd9cf4.chunk.js HTTP/1.1" 200 OK
+INFO:     172.21.12.199:60351 - "GET /static-files/static/js/2587.5e59ba3b.chunk.js HTTP/1.1" 200 OK
+INFO:     172.21.12.199:63949 - "GET /static-files/static/js/3428.60ccdc4b.chunk.js HTTP/1.1" 200 OK
+INFO:     172.21.12.199:64473 - "GET /static-files/static/js/9721.bf5e859c.chunk.js HTTP/1.1" 200 OK
+INFO:     172.21.12.199:50181 - "GET /static-files/static/js/3285.a7b8bac8.chunk.js HTTP/1.1" 200 OK
+INFO:     172.21.12.199:60351 - "GET /static-files/static/js/5813.33361779.chunk.js HTTP/1.1" 200 OK
+INFO:     172.21.12.199:58453 - "GET /static-files/static/js/9640.bcf803af.chunk.js HTTP/1.1" 200 OK
+INFO:     172.21.12.199:63949 - "GET /static-files/static/js/590.b19ebea6.chunk.js HTTP/1.1" 200 OK
+INFO:     172.21.12.199:50181 - "GET /static-files/static/js/3270.96fc46a3.chunk.js HTTP/1.1" 200 OK
+INFO:     172.21.12.199:60351 - "GET /static-files/static/js/7715.1060ceb2.chunk.js HTTP/1.1" 200 OK
+INFO:     172.21.12.199:64473 - "GET /static-files/static/js/experimentPage.4d96c43c.chunk.js HTTP/1.1" 200 OK
+INFO:     172.21.12.199:53781 - "POST /graphql HTTP/1.1" 200 OK
+INFO:     172.21.12.199:64473 - "GET /static-files/static/js/505.b78801d2.chunk.js HTTP/1.1" 200 OK
+INFO:     172.21.12.199:53781 - "GET /static-files/static/css/505.1c6f09d6.chunk.css HTTP/1.1" 200 OK
+INFO:     172.21.12.199:53781 - "POST /ajax-api/2.0/mlflow/experiments/search-datasets HTTP/1.1" 200 OK
+INFO:     172.21.12.199:53781 - "GET /static-files/static/css/1570.21d39143.chunk.css HTTP/1.1" 200 OK
+INFO:     172.21.12.199:64473 - "GET /static-files/static/js/1570.e6a5ccf7.chunk.js HTTP/1.1" 200 OK
+INFO:     172.21.12.199:60351 - "GET /static-files/static/js/2402.1c147bbf.chunk.js HTTP/1.1" 200 OK
+INFO:     172.21.12.199:60351 - "GET /ajax-api/2.0/mlflow/gateway-proxy?gateway_path=api%2F2.0%2Fendpoints%2F HTTP/1.1" 200 OK
+INFO:     172.21.12.199:53781 - "POST /ajax-api/2.0/mlflow/logged-models/search HTTP/1.1" 200 OK
+INFO:     172.21.12.199:50181 - "POST /ajax-api/2.0/mlflow/runs/search HTTP/1.1" 200 OK
+INFO:     172.21.12.199:61449 - "POST /ajax-api/2.0/mlflow/runs/search HTTP/1.1" 200 OK
+INFO:     172.21.12.199:54620 - "POST /ajax-api/2.0/mlflow/runs/search HTTP/1.1" 200 OK
+INFO:     172.21.12.199:58808 - "GET / HTTP/1.1" 304 Not Modified
+INFO:     172.21.12.199:61735 - "GET /ajax-api/2.0/mlflow/traces?experiment_ids=0&order_by=timestamp_ms%20DESC&max_results=1&filter= HTTP/1.1" 200 OK
+INFO:     172.21.12.199:59615 - "POST /ajax-api/2.0/mlflow/runs/search HTTP/1.1" 200 OK
+INFO:     172.21.12.199:61735 - "GET /ajax-api/2.0/mlflow/experiments/get?experiment_id=0 HTTP/1.1" 200 OK
+INFO:     172.21.12.199:59615 - "POST /ajax-api/2.0/mlflow/runs/search HTTP/1.1" 200 OK
+INFO:     172.21.12.199:58623 - "POST /ajax-api/2.0/mlflow/experiments/search-datasets HTTP/1.1" 200 OK
+INFO:     172.21.12.199:58808 - "POST /graphql HTTP/1.1" 200 OK
+INFO:     172.21.12.199:58808 - "GET /ajax-api/2.0/mlflow/gateway-proxy?gateway_path=api%2F2.0%2Fendpoints%2F HTTP/1.1" 200 OK
+INFO:     172.21.12.199:59615 - "POST /ajax-api/2.0/mlflow/logged-models/search HTTP/1.1" 200 OK
+INFO:     172.21.12.199:55397 - "POST /ajax-api/2.0/mlflow/runs/search HTTP/1.1" 200 OK
+INFO:     172.21.12.199:57428 - "GET / HTTP/1.1" 304 Not Modified
+INFO:     172.21.12.199:64245 - "GET /ajax-api/2.0/mlflow/traces?experiment_ids=0&order_by=timestamp_ms%20DESC&max_results=1&filter= HTTP/1.1" 200 OK
+INFO:     172.21.12.199:56362 - "POST /ajax-api/2.0/mlflow/runs/search HTTP/1.1" 200 OK
+INFO:     172.21.12.199:59225 - "GET /ajax-api/2.0/mlflow/experiments/get?experiment_id=0 HTTP/1.1" 200 OK
+INFO:     172.21.12.199:56613 - "POST /ajax-api/2.0/mlflow/experiments/search-datasets HTTP/1.1" 200 OK
+INFO:     172.21.12.199:56613 - "GET /static-files/favicon.ico HTTP/1.1" 200 OK
+INFO:     172.21.12.199:52198 - "POST /ajax-api/2.0/mlflow/runs/search HTTP/1.1" 200 OK
+INFO:     172.21.12.199:52198 - "GET /ajax-api/2.0/mlflow/gateway-proxy?gateway_path=api%2F2.0%2Fendpoints%2F HTTP/1.1" 200 OK
+INFO:     172.21.12.199:56613 - "POST /ajax-api/2.0/mlflow/logged-models/search HTTP/1.1" 200 OK
+INFO:     172.21.12.199:57428 - "POST /graphql HTTP/1.1" 200 OK
+INFO:     172.21.12.199:57428 - "GET / HTTP/1.1" 304 Not Modified
+INFO:     172.21.12.199:56613 - "GET /ajax-api/2.0/mlflow/traces?experiment_ids=0&order_by=timestamp_ms%20DESC&max_results=1&filter= HTTP/1.1" 200 OK
+INFO:     172.21.12.199:57428 - "POST /graphql HTTP/1.1" 200 OK
+INFO:     172.21.12.199:52198 - "POST /ajax-api/2.0/mlflow/runs/search HTTP/1.1" 200 OK
+INFO:     172.21.12.199:56613 - "GET /ajax-api/2.0/mlflow/experiments/get?experiment_id=0 HTTP/1.1" 200 OK
+INFO:     172.21.12.199:57428 - "POST /ajax-api/2.0/mlflow/experiments/search-datasets HTTP/1.1" 200 OK
+INFO:     172.21.12.199:52198 - "POST /ajax-api/2.0/mlflow/runs/search HTTP/1.1" 200 OK
+INFO:     172.21.12.199:57428 - "GET /ajax-api/2.0/mlflow/gateway-proxy?gateway_path=api%2F2.0%2Fendpoints%2F HTTP/1.1" 200 OK
+INFO:     172.21.12.199:52198 - "POST /ajax-api/2.0/mlflow/logged-models/search HTTP/1.1" 200 OK
+INFO:     172.21.12.199:54147 - "POST /ajax-api/2.0/mlflow/runs/search HTTP/1.1" 200 OK
+INFO:     172.21.12.199:54243 - "POST /ajax-api/2.0/mlflow/runs/search HTTP/1.1" 200 OK
+INFO:     172.21.12.199:64276 - "POST /ajax-api/2.0/mlflow/runs/search HTTP/1.1" 200 OK
+INFO:     172.21.12.199:54189 - "POST /ajax-api/2.0/mlflow/runs/search HTTP/1.1" 200 OK
+INFO:     172.21.12.199:57588 - "POST /ajax-api/2.0/mlflow/runs/search HTTP/1.1" 200 OK
+INFO:     172.21.12.199:56320 - "POST /ajax-api/2.0/mlflow/runs/search HTTP/1.1" 200 OK
+INFO:     172.21.12.199:62270 - "POST /ajax-api/2.0/mlflow/runs/search HTTP/1.1" 200 OK
+INFO:     172.21.12.199:51066 - "POST /ajax-api/2.0/mlflow/runs/search HTTP/1.1" 200 OK
+INFO:     172.21.12.199:59120 - "POST /ajax-api/2.0/mlflow/runs/search HTTP/1.1" 200 OK
+INFO:     172.26.15.234:50062 - "GET / HTTP/1.1" 304 Not Modified
 WARNING:root:Malformed experiment '0_meta_backup'. Detailed error Yaml file '/app/data/mlruns/0_meta_backup/meta.yaml' does not exist.
 Traceback (most recent call last):
   File "/usr/local/lib/python3.10/site-packages/mlflow/store/tracking/file_store.py", line 367, in search_experiments
@@ -66,17 +125,379 @@ Traceback (most recent call last):
   File "/usr/local/lib/python3.10/site-packages/mlflow/utils/yaml_utils.py", line 107, in read_yaml
     raise MissingConfigException(f"Yaml file '{file_path}' does not exist.")
 mlflow.exceptions.MissingConfigException: Yaml file '/app/data/mlruns/0_meta_backup/meta.yaml' does not exist.
-INFO:     172.17.0.1:56918 - "GET /ajax-api/2.0/mlflow/experiments/search?max_results=25&order_by=last_update_time+DESC HTTP/1.1" 200 OK
-INFO:     172.17.0.1:56918 - "POST /ajax-api/2.0/mlflow/experiments/search-datasets HTTP/1.1" 200 OK
-INFO:     172.17.0.1:56918 - "POST /ajax-api/2.0/mlflow/logged-models/search HTTP/1.1" 200 OK
-INFO:     172.17.0.1:56932 - "GET /ajax-api/2.0/mlflow/gateway-proxy?gateway_path=api%2F2.0%2Fendpoints%2F HTTP/1.1" 200 OK
-INFO:     172.17.0.1:56946 - "POST /ajax-api/2.0/mlflow/runs/search HTTP/1.1" 200 OK
-INFO:     172.17.0.1:52628 - "POST /ajax-api/2.0/mlflow/runs/search HTTP/1.1" 200 OK
-INFO:     172.17.0.1:52636 - "POST /ajax-api/2.0/mlflow/runs/search HTTP/1.1" 200 OK
-INFO:     172.17.0.1:56538 - "POST /ajax-api/2.0/mlflow/runs/search HTTP/1.1" 200 OK
-INFO:     172.17.0.1:56548 - "POST /ajax-api/2.0/mlflow/runs/search HTTP/1.1" 200 OK
-INFO:     172.17.0.1:52004 - "POST /ajax-api/2.0/mlflow/runs/search HTTP/1.1" 200 OK
-INFO:     172.17.0.1:52016 - "POST /ajax-api/2.0/mlflow/runs/search HTTP/1.1" 200 OK
-INFO:     172.17.0.1:48962 - "POST /ajax-api/2.0/mlflow/runs/search HTTP/1.1" 200 OK
-INFO:     172.17.0.1:48966 - "POST /ajax-api/2.0/mlflow/runs/search HTTP/1.1" 200 OK
-INFO:     172.17.0.1:33638 - "POST /ajax-api/2.0/mlflow/runs/search HTTP/1.1" 200 OK
+INFO:     172.26.15.234:52939 - "GET /ajax-api/2.0/mlflow/experiments/search?max_results=25&order_by=last_update_time+DESC HTTP/1.1" 200 OK
+WARNING:root:Malformed experiment '0_meta_backup'. Detailed error Yaml file '/app/data/mlruns/0_meta_backup/meta.yaml' does not exist.
+Traceback (most recent call last):
+  File "/usr/local/lib/python3.10/site-packages/mlflow/store/tracking/file_store.py", line 367, in search_experiments
+    exp = self._get_experiment(exp_id, view_type)
+  File "/usr/local/lib/python3.10/site-packages/mlflow/store/tracking/file_store.py", line 465, in _get_experiment
+    meta = FileStore._read_yaml(experiment_dir, FileStore.META_DATA_FILE_NAME)
+  File "/usr/local/lib/python3.10/site-packages/mlflow/store/tracking/file_store.py", line 1635, in _read_yaml
+    return _read_helper(root, file_name, attempts_remaining=retries)
+  File "/usr/local/lib/python3.10/site-packages/mlflow/store/tracking/file_store.py", line 1628, in _read_helper
+    result = read_yaml(root, file_name)
+  File "/usr/local/lib/python3.10/site-packages/mlflow/utils/yaml_utils.py", line 107, in read_yaml
+    raise MissingConfigException(f"Yaml file '{file_path}' does not exist.")
+mlflow.exceptions.MissingConfigException: Yaml file '/app/data/mlruns/0_meta_backup/meta.yaml' does not exist.
+INFO:     172.26.15.234:65370 - "GET /ajax-api/2.0/mlflow/experiments/search?max_results=25&order_by=last_update_time+DESC HTTP/1.1" 200 OK
+INFO:     172.26.15.234:65370 - "POST /graphql HTTP/1.1" 200 OK
+INFO:     172.26.15.234:65370 - "POST /ajax-api/2.0/mlflow/experiments/search-datasets HTTP/1.1" 200 OK
+INFO:     172.26.15.234:65370 - "GET /ajax-api/2.0/mlflow/gateway-proxy?gateway_path=api%2F2.0%2Fendpoints%2F HTTP/1.1" 200 OK
+INFO:     172.26.15.234:52489 - "POST /ajax-api/2.0/mlflow/logged-models/search HTTP/1.1" 200 OK
+INFO:     172.26.15.234:52058 - "POST /ajax-api/2.0/mlflow/runs/search HTTP/1.1" 200 OK
+INFO:     172.26.15.234:58700 - "GET / HTTP/1.1" 304 Not Modified
+INFO:     172.26.15.234:58700 - "POST /graphql HTTP/1.1" 200 OK
+INFO:     172.26.15.234:64448 - "GET /ajax-api/2.0/mlflow/traces?experiment_ids=0&order_by=timestamp_ms%20DESC&max_results=1&filter= HTTP/1.1" 200 OK
+INFO:     172.26.15.234:60492 - "POST /ajax-api/2.0/mlflow/runs/search HTTP/1.1" 200 OK
+INFO:     172.26.15.234:58700 - "GET /ajax-api/2.0/mlflow/experiments/get?experiment_id=0 HTTP/1.1" 200 OK
+INFO:     172.26.15.234:64448 - "POST /ajax-api/2.0/mlflow/experiments/search-datasets HTTP/1.1" 200 OK
+INFO:     172.26.15.234:60492 - "POST /ajax-api/2.0/mlflow/runs/search HTTP/1.1" 200 OK
+INFO:     172.26.15.234:64448 - "GET /ajax-api/2.0/mlflow/gateway-proxy?gateway_path=api%2F2.0%2Fendpoints%2F HTTP/1.1" 200 OK
+INFO:     172.26.15.234:60492 - "POST /ajax-api/2.0/mlflow/logged-models/search HTTP/1.1" 200 OK
+INFO:     172.26.15.234:61214 - "POST /ajax-api/2.0/mlflow/runs/search HTTP/1.1" 200 OK
+INFO:     172.26.15.234:51545 - "POST /ajax-api/2.0/mlflow/runs/search HTTP/1.1" 200 OK
+INFO:     172.26.15.234:62864 - "POST /ajax-api/2.0/mlflow/runs/search HTTP/1.1" 200 OK
+INFO:     172.26.14.182:58917 - "GET / HTTP/1.1" 200 OK
+INFO:     172.26.14.182:58917 - "GET /static-files/manifest.json HTTP/1.1" 200 OK
+INFO:     172.26.14.182:58918 - "GET /static-files/static/js/main.3d375fe3.js HTTP/1.1" 200 OK
+INFO:     172.26.14.182:58919 - "GET /static-files/static/css/main.f1270cf7.css HTTP/1.1" 200 OK
+INFO:     172.26.14.182:58917 - "GET /static-files/static/js/9478.cbf55ef3.chunk.js HTTP/1.1" 200 OK
+INFO:     172.26.14.182:58917 - "GET /static-files/static/js/3044.8a4b59f2.chunk.js HTTP/1.1" 200 OK
+INFO:     172.26.14.182:58919 - "GET /static-files/static/js/618.eccaaac3.chunk.js HTTP/1.1" 200 OK
+INFO:     172.26.14.182:58918 - "GET /static-files/static/css/3044.41bf106c.chunk.css HTTP/1.1" 200 OK
+INFO:     172.26.14.182:58918 - "GET /static-files/favicon.ico HTTP/1.1" 200 OK
+WARNING:root:Malformed experiment '0_meta_backup'. Detailed error Yaml file '/app/data/mlruns/0_meta_backup/meta.yaml' does not exist.
+Traceback (most recent call last):
+  File "/usr/local/lib/python3.10/site-packages/mlflow/store/tracking/file_store.py", line 367, in search_experiments
+    exp = self._get_experiment(exp_id, view_type)
+  File "/usr/local/lib/python3.10/site-packages/mlflow/store/tracking/file_store.py", line 465, in _get_experiment
+    meta = FileStore._read_yaml(experiment_dir, FileStore.META_DATA_FILE_NAME)
+  File "/usr/local/lib/python3.10/site-packages/mlflow/store/tracking/file_store.py", line 1635, in _read_yaml
+    return _read_helper(root, file_name, attempts_remaining=retries)
+  File "/usr/local/lib/python3.10/site-packages/mlflow/store/tracking/file_store.py", line 1628, in _read_helper
+    result = read_yaml(root, file_name)
+  File "/usr/local/lib/python3.10/site-packages/mlflow/utils/yaml_utils.py", line 107, in read_yaml
+    raise MissingConfigException(f"Yaml file '{file_path}' does not exist.")
+mlflow.exceptions.MissingConfigException: Yaml file '/app/data/mlruns/0_meta_backup/meta.yaml' does not exist.
+INFO:     172.26.14.182:58919 - "GET /ajax-api/2.0/mlflow/experiments/search?max_results=25&order_by=last_update_time+DESC HTTP/1.1" 200 OK
+INFO:     172.26.15.234:49946 - "POST /ajax-api/2.0/mlflow/runs/search HTTP/1.1" 200 OK
+INFO:     172.26.14.182:58938 - "GET / HTTP/1.1" 304 Not Modified
+WARNING:root:Malformed experiment '0_meta_backup'. Detailed error Yaml file '/app/data/mlruns/0_meta_backup/meta.yaml' does not exist.
+Traceback (most recent call last):
+  File "/usr/local/lib/python3.10/site-packages/mlflow/store/tracking/file_store.py", line 367, in search_experiments
+    exp = self._get_experiment(exp_id, view_type)
+  File "/usr/local/lib/python3.10/site-packages/mlflow/store/tracking/file_store.py", line 465, in _get_experiment
+    meta = FileStore._read_yaml(experiment_dir, FileStore.META_DATA_FILE_NAME)
+  File "/usr/local/lib/python3.10/site-packages/mlflow/store/tracking/file_store.py", line 1635, in _read_yaml
+    return _read_helper(root, file_name, attempts_remaining=retries)
+  File "/usr/local/lib/python3.10/site-packages/mlflow/store/tracking/file_store.py", line 1628, in _read_helper
+    result = read_yaml(root, file_name)
+  File "/usr/local/lib/python3.10/site-packages/mlflow/utils/yaml_utils.py", line 107, in read_yaml
+    raise MissingConfigException(f"Yaml file '{file_path}' does not exist.")
+mlflow.exceptions.MissingConfigException: Yaml file '/app/data/mlruns/0_meta_backup/meta.yaml' does not exist.
+INFO:     172.26.14.182:58938 - "GET /ajax-api/2.0/mlflow/experiments/search?max_results=25&order_by=last_update_time+DESC HTTP/1.1" 200 OK
+INFO:     172.26.14.182:58938 - "GET / HTTP/1.1" 304 Not Modified
+WARNING:root:Malformed experiment '0_meta_backup'. Detailed error Yaml file '/app/data/mlruns/0_meta_backup/meta.yaml' does not exist.
+Traceback (most recent call last):
+  File "/usr/local/lib/python3.10/site-packages/mlflow/store/tracking/file_store.py", line 367, in search_experiments
+    exp = self._get_experiment(exp_id, view_type)
+  File "/usr/local/lib/python3.10/site-packages/mlflow/store/tracking/file_store.py", line 465, in _get_experiment
+    meta = FileStore._read_yaml(experiment_dir, FileStore.META_DATA_FILE_NAME)
+  File "/usr/local/lib/python3.10/site-packages/mlflow/store/tracking/file_store.py", line 1635, in _read_yaml
+    return _read_helper(root, file_name, attempts_remaining=retries)
+  File "/usr/local/lib/python3.10/site-packages/mlflow/store/tracking/file_store.py", line 1628, in _read_helper
+    result = read_yaml(root, file_name)
+  File "/usr/local/lib/python3.10/site-packages/mlflow/utils/yaml_utils.py", line 107, in read_yaml
+    raise MissingConfigException(f"Yaml file '{file_path}' does not exist.")
+mlflow.exceptions.MissingConfigException: Yaml file '/app/data/mlruns/0_meta_backup/meta.yaml' does not exist.
+INFO:     172.26.14.182:58938 - "GET /ajax-api/2.0/mlflow/experiments/search?max_results=25&order_by=last_update_time+DESC HTTP/1.1" 200 OK
+INFO:     172.26.15.234:61943 - "POST /ajax-api/2.0/mlflow/runs/search HTTP/1.1" 200 OK
+INFO:     172.26.15.234:54858 - "POST /ajax-api/2.0/mlflow/runs/search HTTP/1.1" 200 OK
+INFO:     172.26.15.234:57517 - "POST /ajax-api/2.0/mlflow/runs/search HTTP/1.1" 200 OK
+INFO:     172.26.15.234:60454 - "POST /ajax-api/2.0/mlflow/runs/search HTTP/1.1" 200 OK
+INFO:     172.26.15.234:61782 - "POST /ajax-api/2.0/mlflow/runs/search HTTP/1.1" 200 OK
+INFO:     172.26.15.234:50551 - "POST /ajax-api/2.0/mlflow/runs/search HTTP/1.1" 200 OK
+INFO:     172.26.15.234:55789 - "POST /ajax-api/2.0/mlflow/runs/search HTTP/1.1" 200 OK
+INFO:     172.26.15.234:58294 - "POST /ajax-api/2.0/mlflow/runs/search HTTP/1.1" 200 OK
+INFO:     172.26.15.234:65143 - "POST /ajax-api/2.0/mlflow/runs/search HTTP/1.1" 200 OK
+INFO:     172.26.15.234:52913 - "POST /ajax-api/2.0/mlflow/runs/search HTTP/1.1" 200 OK
+INFO:     172.26.15.234:50181 - "POST /ajax-api/2.0/mlflow/runs/search HTTP/1.1" 200 OK
+INFO:     172.26.15.234:49572 - "POST /ajax-api/2.0/mlflow/runs/search HTTP/1.1" 200 OK
+INFO:     172.26.15.234:57728 - "POST /ajax-api/2.0/mlflow/runs/search HTTP/1.1" 200 OK
+INFO:     172.26.15.234:60590 - "POST /ajax-api/2.0/mlflow/runs/search HTTP/1.1" 200 OK
+INFO:     172.26.15.234:62005 - "POST /ajax-api/2.0/mlflow/runs/search HTTP/1.1" 200 OK
+INFO:     172.26.15.234:56699 - "POST /ajax-api/2.0/mlflow/runs/search HTTP/1.1" 200 OK
+INFO:     172.26.15.234:65400 - "POST /ajax-api/2.0/mlflow/runs/search HTTP/1.1" 200 OK
+INFO:     172.26.15.234:51566 - "POST /ajax-api/2.0/mlflow/runs/search HTTP/1.1" 200 OK
+INFO:     172.26.15.234:57411 - "POST /ajax-api/2.0/mlflow/runs/search HTTP/1.1" 200 OK
+INFO:     172.26.15.234:57214 - "POST /ajax-api/2.0/mlflow/runs/search HTTP/1.1" 200 OK
+INFO:     172.21.13.86:53672 - "GET / HTTP/1.1" 200 OK
+INFO:     172.21.13.86:53672 - "GET /static-files/static/js/main.3d375fe3.js HTTP/1.1" 200 OK
+INFO:     172.21.13.86:53680 - "GET /static-files/static/css/main.f1270cf7.css HTTP/1.1" 200 OK
+INFO:     172.21.13.86:53672 - "GET /static-files/static/js/9478.cbf55ef3.chunk.js HTTP/1.1" 200 OK
+INFO:     172.21.13.86:53672 - "GET /static-files/favicon.ico HTTP/1.1" 200 OK
+INFO:     172.21.13.86:53672 - "GET /static-files/static/js/618.eccaaac3.chunk.js HTTP/1.1" 200 OK
+INFO:     172.21.13.86:53680 - "GET /static-files/static/css/3044.41bf106c.chunk.css HTTP/1.1" 200 OK
+INFO:     172.21.13.86:53690 - "GET /static-files/static/js/3044.8a4b59f2.chunk.js HTTP/1.1" 200 OK
+WARNING:root:Malformed experiment '0_meta_backup'. Detailed error Yaml file '/app/data/mlruns/0_meta_backup/meta.yaml' does not exist.
+Traceback (most recent call last):
+  File "/usr/local/lib/python3.10/site-packages/mlflow/store/tracking/file_store.py", line 367, in search_experiments
+    exp = self._get_experiment(exp_id, view_type)
+  File "/usr/local/lib/python3.10/site-packages/mlflow/store/tracking/file_store.py", line 465, in _get_experiment
+    meta = FileStore._read_yaml(experiment_dir, FileStore.META_DATA_FILE_NAME)
+  File "/usr/local/lib/python3.10/site-packages/mlflow/store/tracking/file_store.py", line 1635, in _read_yaml
+    return _read_helper(root, file_name, attempts_remaining=retries)
+  File "/usr/local/lib/python3.10/site-packages/mlflow/store/tracking/file_store.py", line 1628, in _read_helper
+    result = read_yaml(root, file_name)
+  File "/usr/local/lib/python3.10/site-packages/mlflow/utils/yaml_utils.py", line 107, in read_yaml
+    raise MissingConfigException(f"Yaml file '{file_path}' does not exist.")
+mlflow.exceptions.MissingConfigException: Yaml file '/app/data/mlruns/0_meta_backup/meta.yaml' does not exist.
+INFO:     172.21.13.86:53690 - "GET /ajax-api/2.0/mlflow/experiments/search?max_results=25&order_by=last_update_time+DESC HTTP/1.1" 200 OK
+INFO:     172.21.13.86:46812 - "GET /static-files/static/js/7027.6961c163.chunk.js HTTP/1.1" 200 OK
+INFO:     172.21.13.86:46854 - "GET /static-files/static/js/4153.af01f731.chunk.js HTTP/1.1" 200 OK
+INFO:     172.21.13.86:46838 - "GET /static-files/static/js/4175.8b841372.chunk.js HTTP/1.1" 200 OK
+INFO:     172.21.13.86:46864 - "GET /static-files/static/js/5879.8c03c3a7.chunk.js HTTP/1.1" 200 OK
+INFO:     172.21.13.86:46878 - "GET /static-files/static/js/2134.88c9cfcf.chunk.js HTTP/1.1" 200 OK
+INFO:     172.21.13.86:46826 - "GET /static-files/static/js/2079.456be601.chunk.js HTTP/1.1" 200 OK
+INFO:     172.21.13.86:46854 - "GET /static-files/static/css/experimentPage.b886c467.chunk.css HTTP/1.1" 200 OK
+INFO:     172.21.13.86:46826 - "GET /static-files/static/js/2231.5a7fbe5e.chunk.js HTTP/1.1" 200 OK
+INFO:     172.21.13.86:46812 - "GET /static-files/static/js/3067.3b0c5ce8.chunk.js HTTP/1.1" 200 OK
+INFO:     172.21.13.86:46854 - "GET /static-files/static/js/2121.02d55e17.chunk.js HTTP/1.1" 200 OK
+INFO:     172.21.13.86:46826 - "GET /static-files/static/js/1240.bbfffe0d.chunk.js HTTP/1.1" 200 OK
+INFO:     172.21.13.86:46838 - "GET /static-files/static/js/7816.b5c1abd2.chunk.js HTTP/1.1" 200 OK
+INFO:     172.21.13.86:46826 - "GET /static-files/static/js/1107.c4dd9cf4.chunk.js HTTP/1.1" 200 OK
+INFO:     172.21.13.86:46812 - "GET /static-files/static/js/2587.5e59ba3b.chunk.js HTTP/1.1" 200 OK
+INFO:     172.21.13.86:46826 - "GET /static-files/static/js/3428.60ccdc4b.chunk.js HTTP/1.1" 200 OK
+INFO:     172.21.13.86:46812 - "GET /static-files/static/js/9721.bf5e859c.chunk.js HTTP/1.1" 200 OK
+INFO:     172.21.13.86:46854 - "GET /static-files/static/js/5813.33361779.chunk.js HTTP/1.1" 200 OK
+INFO:     172.21.13.86:46854 - "GET /static-files/static/js/3285.a7b8bac8.chunk.js HTTP/1.1" 200 OK
+INFO:     172.21.13.86:46812 - "GET /static-files/static/js/9640.bcf803af.chunk.js HTTP/1.1" 200 OK
+INFO:     172.21.13.86:46864 - "GET /static-files/static/js/590.b19ebea6.chunk.js HTTP/1.1" 200 OK
+INFO:     172.21.13.86:46854 - "GET /static-files/static/js/3270.96fc46a3.chunk.js HTTP/1.1" 200 OK
+INFO:     172.21.13.86:46812 - "GET /static-files/static/js/7715.1060ceb2.chunk.js HTTP/1.1" 200 OK
+INFO:     172.21.13.86:46864 - "GET /static-files/static/js/experimentPage.4d96c43c.chunk.js HTTP/1.1" 200 OK
+INFO:     172.21.13.86:46878 - "POST /graphql HTTP/1.1" 200 OK
+INFO:     172.21.13.86:46878 - "GET /static-files/static/css/505.1c6f09d6.chunk.css HTTP/1.1" 200 OK
+INFO:     172.21.13.86:46854 - "GET /static-files/static/js/505.b78801d2.chunk.js HTTP/1.1" 200 OK
+INFO:     172.21.13.86:46878 - "POST /ajax-api/2.0/mlflow/experiments/search-datasets HTTP/1.1" 200 OK
+INFO:     172.21.13.86:46878 - "GET /static-files/static/css/1570.21d39143.chunk.css HTTP/1.1" 200 OK
+INFO:     172.21.13.86:46854 - "GET /static-files/static/js/1570.e6a5ccf7.chunk.js HTTP/1.1" 200 OK
+INFO:     172.21.13.86:46864 - "GET /static-files/static/js/2402.1c147bbf.chunk.js HTTP/1.1" 200 OK
+INFO:     172.21.13.86:46878 - "GET /ajax-api/2.0/mlflow/gateway-proxy?gateway_path=api%2F2.0%2Fendpoints%2F HTTP/1.1" 200 OK
+INFO:     172.21.13.86:46864 - "POST /ajax-api/2.0/mlflow/logged-models/search HTTP/1.1" 200 OK
+INFO:     172.21.13.86:46812 - "POST /ajax-api/2.0/mlflow/runs/search HTTP/1.1" 200 OK
+INFO:     172.21.13.86:46854 - "POST /ajax-api/2.0/mlflow/runs/search HTTP/1.1" 200 OK
+INFO:     172.21.13.86:57708 - "GET /static-files/static/js/7453.2ee01df4.chunk.js HTTP/1.1" 200 OK
+INFO:     172.21.13.86:57742 - "GET /static-files/static/css/8455.3cd9f5ca.chunk.css HTTP/1.1" 200 OK
+INFO:     172.21.13.86:57692 - "GET /static-files/static/js/2633.610c7275.chunk.js HTTP/1.1" 200 OK
+INFO:     172.21.13.86:57720 - "GET /static-files/static/js/47.c3fdc3f4.chunk.js HTTP/1.1" 200 OK
+INFO:     172.21.13.86:57724 - "GET /static-files/static/js/2586.e6839fb7.chunk.js HTTP/1.1" 200 OK
+INFO:     172.21.13.86:57740 - "GET /static-files/static/js/701.e7dbd4d1.chunk.js HTTP/1.1" 200 OK
+INFO:     172.21.13.86:57708 - "GET /static-files/static/js/7364.b91e87c1.chunk.js HTTP/1.1" 200 OK
+INFO:     172.21.13.86:57742 - "GET /static-files/static/js/8455.d8d24bfc.chunk.js HTTP/1.1" 200 OK
+INFO:     172.21.13.86:57692 - "GET /ajax-api/2.0/mlflow/model-versions/search?filter=tags.%60mlflow.prompt.is_prompt%60+%3D+%27true%27+AND+tags.%60mlflow.prompt.run_ids%60+ILIKE+%22%25af6054ecf0f14cf3a03612328bc78ab0%25%22 HTTP/1.1" 200 OK
+INFO:     172.21.13.86:57742 - "GET /ajax-api/2.0/mlflow/model-versions/search?filter=run_id%3D%27af6054ecf0f14cf3a03612328bc78ab0%27 HTTP/1.1" 200 OK
+INFO:     172.21.15.229:49731 - "GET / HTTP/1.1" 200 OK
+INFO:     172.21.15.229:49731 - "GET /static-files/manifest.json HTTP/1.1" 200 OK
+INFO:     172.21.15.229:49733 - "GET /static-files/static/css/main.f1270cf7.css HTTP/1.1" 200 OK
+INFO:     172.21.15.229:49732 - "GET /static-files/static/js/main.3d375fe3.js HTTP/1.1" 200 OK
+INFO:     172.21.15.229:49682 - "GET /static-files/favicon.ico HTTP/1.1" 200 OK
+INFO:     172.21.15.229:49731 - "GET /static-files/static/js/9478.cbf55ef3.chunk.js HTTP/1.1" 200 OK
+INFO:     172.21.15.229:49731 - "GET /static-files/static/js/618.eccaaac3.chunk.js HTTP/1.1" 200 OK
+INFO:     172.21.15.229:49732 - "GET /static-files/static/css/3044.41bf106c.chunk.css HTTP/1.1" 200 OK
+INFO:     172.21.15.229:49733 - "GET /static-files/static/js/3044.8a4b59f2.chunk.js HTTP/1.1" 200 OK
+WARNING:root:Malformed experiment '0_meta_backup'. Detailed error Yaml file '/app/data/mlruns/0_meta_backup/meta.yaml' does not exist.
+Traceback (most recent call last):
+  File "/usr/local/lib/python3.10/site-packages/mlflow/store/tracking/file_store.py", line 367, in search_experiments
+    exp = self._get_experiment(exp_id, view_type)
+  File "/usr/local/lib/python3.10/site-packages/mlflow/store/tracking/file_store.py", line 465, in _get_experiment
+    meta = FileStore._read_yaml(experiment_dir, FileStore.META_DATA_FILE_NAME)
+  File "/usr/local/lib/python3.10/site-packages/mlflow/store/tracking/file_store.py", line 1635, in _read_yaml
+    return _read_helper(root, file_name, attempts_remaining=retries)
+  File "/usr/local/lib/python3.10/site-packages/mlflow/store/tracking/file_store.py", line 1628, in _read_helper
+    result = read_yaml(root, file_name)
+  File "/usr/local/lib/python3.10/site-packages/mlflow/utils/yaml_utils.py", line 107, in read_yaml
+    raise MissingConfigException(f"Yaml file '{file_path}' does not exist.")
+mlflow.exceptions.MissingConfigException: Yaml file '/app/data/mlruns/0_meta_backup/meta.yaml' does not exist.
+INFO:     172.21.15.229:49731 - "GET /ajax-api/2.0/mlflow/experiments/search?max_results=25&order_by=last_update_time+DESC HTTP/1.1" 200 OK
+INFO:     172.21.15.229:49734 - "GET /static-files/static/js/7027.6961c163.chunk.js HTTP/1.1" 200 OK
+INFO:     172.21.15.229:49738 - "GET /static-files/static/js/5879.8c03c3a7.chunk.js HTTP/1.1" 200 OK
+INFO:     172.21.15.229:49736 - "GET /static-files/static/js/4175.8b841372.chunk.js HTTP/1.1" 200 OK
+INFO:     172.21.15.229:49735 - "GET /static-files/static/js/2079.456be601.chunk.js HTTP/1.1" 200 OK
+INFO:     172.21.15.229:49737 - "GET /static-files/static/js/4153.af01f731.chunk.js HTTP/1.1" 200 OK
+INFO:     172.21.15.229:49739 - "GET /static-files/static/js/2134.88c9cfcf.chunk.js HTTP/1.1" 200 OK
+INFO:     172.21.15.229:49737 - "GET /static-files/static/js/3067.3b0c5ce8.chunk.js HTTP/1.1" 200 OK
+INFO:     172.21.15.229:49734 - "GET /static-files/static/js/2121.02d55e17.chunk.js HTTP/1.1" 200 OK
+INFO:     172.21.15.229:49735 - "GET /static-files/static/js/2231.5a7fbe5e.chunk.js HTTP/1.1" 200 OK
+INFO:     172.21.15.229:49734 - "GET /static-files/static/js/7816.b5c1abd2.chunk.js HTTP/1.1" 200 OK
+INFO:     172.21.15.229:49737 - "GET /static-files/static/js/1240.bbfffe0d.chunk.js HTTP/1.1" 200 OK
+INFO:     172.21.15.229:49736 - "GET /static-files/static/js/2587.5e59ba3b.chunk.js HTTP/1.1" 200 OK
+INFO:     172.21.15.229:49735 - "GET /static-files/static/js/1107.c4dd9cf4.chunk.js HTTP/1.1" 200 OK
+INFO:     172.21.15.229:49736 - "GET /static-files/static/js/3428.60ccdc4b.chunk.js HTTP/1.1" 200 OK
+INFO:     172.21.15.229:49737 - "GET /static-files/static/js/9721.bf5e859c.chunk.js HTTP/1.1" 200 OK
+INFO:     172.21.15.229:49738 - "GET /static-files/static/js/3285.a7b8bac8.chunk.js HTTP/1.1" 200 OK
+INFO:     172.21.15.229:49735 - "GET /static-files/static/js/5813.33361779.chunk.js HTTP/1.1" 200 OK
+INFO:     172.21.15.229:49737 - "GET /static-files/static/js/9640.bcf803af.chunk.js HTTP/1.1" 200 OK
+INFO:     172.21.15.229:49734 - "GET /static-files/static/js/590.b19ebea6.chunk.js HTTP/1.1" 200 OK
+INFO:     172.21.15.229:49735 - "GET /static-files/static/js/7715.1060ceb2.chunk.js HTTP/1.1" 200 OK
+INFO:     172.21.15.229:49738 - "GET /static-files/static/js/3270.96fc46a3.chunk.js HTTP/1.1" 200 OK
+INFO:     172.21.15.229:49737 - "GET /static-files/static/css/experimentPage.b886c467.chunk.css HTTP/1.1" 200 OK
+INFO:     172.21.15.229:49736 - "GET /static-files/static/js/experimentPage.4d96c43c.chunk.js HTTP/1.1" 200 OK
+INFO:     172.21.15.229:49734 - "POST /graphql HTTP/1.1" 200 OK
+INFO:     172.21.15.229:49734 - "GET /static-files/static/css/505.1c6f09d6.chunk.css HTTP/1.1" 200 OK
+INFO:     172.21.15.229:49735 - "GET /static-files/static/js/505.b78801d2.chunk.js HTTP/1.1" 200 OK
+INFO:     172.21.15.229:49735 - "GET /static-files/static/css/1570.21d39143.chunk.css HTTP/1.1" 200 OK
+INFO:     172.21.15.229:49737 - "GET /static-files/static/js/2402.1c147bbf.chunk.js HTTP/1.1" 200 OK
+INFO:     172.21.15.229:49736 - "GET /static-files/static/js/1570.e6a5ccf7.chunk.js HTTP/1.1" 200 OK
+INFO:     172.21.15.229:49734 - "POST /ajax-api/2.0/mlflow/experiments/search-datasets HTTP/1.1" 200 OK
+INFO:     172.21.15.229:49734 - "GET /ajax-api/2.0/mlflow/gateway-proxy?gateway_path=api%2F2.0%2Fendpoints%2F HTTP/1.1" 200 OK
+INFO:     172.21.15.229:49737 - "POST /ajax-api/2.0/mlflow/logged-models/search HTTP/1.1" 200 OK
+INFO:     172.21.15.229:49738 - "POST /ajax-api/2.0/mlflow/runs/search HTTP/1.1" 200 OK
+INFO:     172.21.15.229:49738 - "GET /static-files/static/js/701.e7dbd4d1.chunk.js HTTP/1.1" 200 OK
+INFO:     172.21.15.229:49735 - "GET /static-files/static/js/7453.2ee01df4.chunk.js HTTP/1.1" 200 OK
+INFO:     172.21.15.229:49734 - "GET /static-files/static/js/2633.610c7275.chunk.js HTTP/1.1" 200 OK
+INFO:     172.21.15.229:49737 - "GET /static-files/static/js/2586.e6839fb7.chunk.js HTTP/1.1" 200 OK
+INFO:     172.21.15.229:49736 - "GET /static-files/static/js/47.c3fdc3f4.chunk.js HTTP/1.1" 200 OK
+INFO:     172.21.15.229:49740 - "GET /static-files/static/js/7364.b91e87c1.chunk.js HTTP/1.1" 200 OK
+INFO:     172.21.15.229:49735 - "GET /static-files/static/css/8455.3cd9f5ca.chunk.css HTTP/1.1" 200 OK
+INFO:     172.21.15.229:49738 - "GET /static-files/static/js/8455.d8d24bfc.chunk.js HTTP/1.1" 200 OK
+INFO:     172.21.15.229:49734 - "GET /ajax-api/2.0/mlflow/model-versions/search?filter=tags.%60mlflow.prompt.is_prompt%60+%3D+%27true%27+AND+tags.%60mlflow.prompt.run_ids%60+ILIKE+%22%25a928a32d5f074097abda309f1376068b%25%22 HTTP/1.1" 200 OK
+INFO:     172.21.15.229:49735 - "GET /ajax-api/2.0/mlflow/model-versions/search?filter=run_id%3D%27a928a32d5f074097abda309f1376068b%27 HTTP/1.1" 200 OK
+INFO:     172.21.12.41:53348 - "GET / HTTP/1.1" 200 OK
+INFO:     172.21.12.41:53348 - "GET /static-files/static/js/main.3d375fe3.js HTTP/1.1" 200 OK
+INFO:     172.21.12.41:50084 - "GET /static-files/static/css/main.f1270cf7.css HTTP/1.1" 200 OK
+INFO:     172.21.12.41:53348 - "GET /static-files/static/js/9478.cbf55ef3.chunk.js HTTP/1.1" 200 OK
+INFO:     172.21.12.41:53348 - "GET /static-files/static/js/618.eccaaac3.chunk.js HTTP/1.1" 200 OK
+INFO:     172.21.12.41:50084 - "GET /static-files/static/css/3044.41bf106c.chunk.css HTTP/1.1" 200 OK
+INFO:     172.21.12.41:53479 - "GET /static-files/static/js/3044.8a4b59f2.chunk.js HTTP/1.1" 200 OK
+WARNING:root:Malformed experiment '0_meta_backup'. Detailed error Yaml file '/app/data/mlruns/0_meta_backup/meta.yaml' does not exist.
+Traceback (most recent call last):
+  File "/usr/local/lib/python3.10/site-packages/mlflow/store/tracking/file_store.py", line 367, in search_experiments
+    exp = self._get_experiment(exp_id, view_type)
+  File "/usr/local/lib/python3.10/site-packages/mlflow/store/tracking/file_store.py", line 465, in _get_experiment
+    meta = FileStore._read_yaml(experiment_dir, FileStore.META_DATA_FILE_NAME)
+  File "/usr/local/lib/python3.10/site-packages/mlflow/store/tracking/file_store.py", line 1635, in _read_yaml
+    return _read_helper(root, file_name, attempts_remaining=retries)
+  File "/usr/local/lib/python3.10/site-packages/mlflow/store/tracking/file_store.py", line 1628, in _read_helper
+    result = read_yaml(root, file_name)
+  File "/usr/local/lib/python3.10/site-packages/mlflow/utils/yaml_utils.py", line 107, in read_yaml
+    raise MissingConfigException(f"Yaml file '{file_path}' does not exist.")
+mlflow.exceptions.MissingConfigException: Yaml file '/app/data/mlruns/0_meta_backup/meta.yaml' does not exist.
+INFO:     172.21.12.41:53479 - "GET /ajax-api/2.0/mlflow/experiments/search?max_results=25&order_by=last_update_time+DESC HTTP/1.1" 200 OK
+INFO:     172.21.12.41:53479 - "GET /static-files/favicon.ico HTTP/1.1" 200 OK
+INFO:     172.21.12.41:53348 - "GET /static-files/static/js/2079.456be601.chunk.js HTTP/1.1" 200 OK
+INFO:     172.21.12.41:50084 - "GET /static-files/static/js/4175.8b841372.chunk.js HTTP/1.1" 200 OK
+INFO:     172.21.12.41:53479 - "GET /static-files/static/js/7027.6961c163.chunk.js HTTP/1.1" 200 OK
+INFO:     172.21.12.41:52835 - "GET /static-files/static/js/5879.8c03c3a7.chunk.js HTTP/1.1" 200 OK
+INFO:     172.21.12.41:64687 - "GET /static-files/static/js/4153.af01f731.chunk.js HTTP/1.1" 200 OK
+INFO:     172.21.12.41:58857 - "GET /static-files/static/css/experimentPage.b886c467.chunk.css HTTP/1.1" 200 OK
+INFO:     172.21.12.41:53348 - "GET /static-files/static/js/2134.88c9cfcf.chunk.js HTTP/1.1" 200 OK
+INFO:     172.21.12.41:53479 - "GET /static-files/static/js/2231.5a7fbe5e.chunk.js HTTP/1.1" 200 OK
+INFO:     172.21.12.41:58857 - "GET /static-files/static/js/2121.02d55e17.chunk.js HTTP/1.1" 200 OK
+INFO:     172.21.12.41:64687 - "GET /static-files/static/js/3067.3b0c5ce8.chunk.js HTTP/1.1" 200 OK
+INFO:     172.21.12.41:50084 - "GET /static-files/static/js/1240.bbfffe0d.chunk.js HTTP/1.1" 200 OK
+INFO:     172.21.12.41:53479 - "GET /static-files/static/js/7816.b5c1abd2.chunk.js HTTP/1.1" 200 OK
+INFO:     172.21.12.41:50084 - "GET /static-files/static/js/1107.c4dd9cf4.chunk.js HTTP/1.1" 200 OK
+INFO:     172.21.12.41:50084 - "GET /static-files/static/js/3428.60ccdc4b.chunk.js HTTP/1.1" 200 OK
+INFO:     172.21.12.41:64687 - "GET /static-files/static/js/2587.5e59ba3b.chunk.js HTTP/1.1" 200 OK
+INFO:     172.21.12.41:53479 - "GET /static-files/static/js/9721.bf5e859c.chunk.js HTTP/1.1" 200 OK
+INFO:     172.21.12.41:58857 - "GET /static-files/static/js/5813.33361779.chunk.js HTTP/1.1" 200 OK
+INFO:     172.21.12.41:64687 - "GET /static-files/static/js/3285.a7b8bac8.chunk.js HTTP/1.1" 200 OK
+INFO:     172.21.12.41:52835 - "GET /static-files/static/js/9640.bcf803af.chunk.js HTTP/1.1" 200 OK
+INFO:     172.21.12.41:58857 - "GET /static-files/static/js/590.b19ebea6.chunk.js HTTP/1.1" 200 OK
+INFO:     172.21.12.41:53479 - "GET /static-files/static/js/7715.1060ceb2.chunk.js HTTP/1.1" 200 OK
+INFO:     172.21.12.41:50084 - "GET /static-files/static/js/experimentPage.4d96c43c.chunk.js HTTP/1.1" 200 OK
+INFO:     172.21.12.41:64687 - "GET /static-files/static/js/3270.96fc46a3.chunk.js HTTP/1.1" 200 OK
+INFO:     172.21.12.41:53348 - "POST /graphql HTTP/1.1" 200 OK
+INFO:     172.21.12.41:64687 - "GET /static-files/static/js/505.b78801d2.chunk.js HTTP/1.1" 200 OK
+INFO:     172.21.12.41:53348 - "GET /static-files/static/css/505.1c6f09d6.chunk.css HTTP/1.1" 200 OK
+INFO:     172.21.12.41:53348 - "POST /ajax-api/2.0/mlflow/experiments/search-datasets HTTP/1.1" 200 OK
+INFO:     172.21.12.41:64687 - "GET /static-files/static/js/1570.e6a5ccf7.chunk.js HTTP/1.1" 200 OK
+INFO:     172.21.12.41:53348 - "GET /static-files/static/css/1570.21d39143.chunk.css HTTP/1.1" 200 OK
+INFO:     172.21.12.41:50084 - "GET /static-files/static/js/2402.1c147bbf.chunk.js HTTP/1.1" 200 OK
+INFO:     172.21.12.41:53348 - "POST /ajax-api/2.0/mlflow/logged-models/search HTTP/1.1" 200 OK
+INFO:     172.21.12.41:50084 - "GET /ajax-api/2.0/mlflow/gateway-proxy?gateway_path=api%2F2.0%2Fendpoints%2F HTTP/1.1" 200 OK
+INFO:     172.21.12.41:58857 - "POST /ajax-api/2.0/mlflow/runs/search HTTP/1.1" 200 OK
+INFO:     172.26.15.213:42080 - "GET / HTTP/1.1" 200 OK
+INFO:     172.26.15.213:42080 - "GET /static-files/static/js/main.3d375fe3.js HTTP/1.1" 200 OK
+INFO:     172.26.15.213:42078 - "GET /static-files/static/css/main.f1270cf7.css HTTP/1.1" 200 OK
+INFO:     172.26.15.213:42080 - "GET /static-files/static/js/9478.cbf55ef3.chunk.js HTTP/1.1" 200 OK
+INFO:     172.26.15.213:42078 - "GET /static-files/favicon.ico HTTP/1.1" 200 OK
+INFO:     172.26.15.213:42078 - "GET /static-files/static/js/618.eccaaac3.chunk.js HTTP/1.1" 200 OK
+INFO:     172.26.15.213:42080 - "GET /static-files/static/css/3044.41bf106c.chunk.css HTTP/1.1" 200 OK
+INFO:     172.26.15.213:49152 - "GET /static-files/static/js/3044.8a4b59f2.chunk.js HTTP/1.1" 200 OK
+WARNING:root:Malformed experiment '0_meta_backup'. Detailed error Yaml file '/app/data/mlruns/0_meta_backup/meta.yaml' does not exist.
+Traceback (most recent call last):
+  File "/usr/local/lib/python3.10/site-packages/mlflow/store/tracking/file_store.py", line 367, in search_experiments
+    exp = self._get_experiment(exp_id, view_type)
+  File "/usr/local/lib/python3.10/site-packages/mlflow/store/tracking/file_store.py", line 465, in _get_experiment
+    meta = FileStore._read_yaml(experiment_dir, FileStore.META_DATA_FILE_NAME)
+  File "/usr/local/lib/python3.10/site-packages/mlflow/store/tracking/file_store.py", line 1635, in _read_yaml
+    return _read_helper(root, file_name, attempts_remaining=retries)
+  File "/usr/local/lib/python3.10/site-packages/mlflow/store/tracking/file_store.py", line 1628, in _read_helper
+    result = read_yaml(root, file_name)
+  File "/usr/local/lib/python3.10/site-packages/mlflow/utils/yaml_utils.py", line 107, in read_yaml
+    raise MissingConfigException(f"Yaml file '{file_path}' does not exist.")
+mlflow.exceptions.MissingConfigException: Yaml file '/app/data/mlruns/0_meta_backup/meta.yaml' does not exist.
+INFO:     172.26.15.213:49152 - "GET /ajax-api/2.0/mlflow/experiments/search?max_results=25&order_by=last_update_time+DESC HTTP/1.1" 200 OK
+INFO:     172.26.15.213:49162 - "GET /static-files/static/css/301.ca66900f.chunk.css HTTP/1.1" 200 OK
+INFO:     172.26.15.213:49154 - "GET /static-files/static/js/3464.b74283ee.chunk.js HTTP/1.1" 200 OK
+INFO:     172.26.15.213:49178 - "GET /static-files/static/js/301.78007945.chunk.js HTTP/1.1" 200 OK
+INFO:     172.26.15.213:49154 - "GET /ajax-api/2.0/mlflow/registered-models/search?filter=&max_results=25&order_by=name+ASC HTTP/1.1" 200 OK
+INFO:     172.26.15.213:49178 - "GET /static-files/static/js/6742.6cc40d4e.chunk.js HTTP/1.1" 200 OK
+INFO:     172.26.15.213:49154 - "GET /static-files/static/js/6462.1a6a178d.chunk.js HTTP/1.1" 200 OK
+INFO:     172.26.15.213:49154 - "GET /ajax-api/2.0/mlflow/registered-models/search?filter=tags.%60mlflow.prompt.is_prompt%60+%3D+%27true%27 HTTP/1.1" 200 OK
+INFO:     172.26.15.213:49154 - "GET /ajax-api/2.0/mlflow/registered-models/search?filter=&max_results=25&order_by=name+ASC HTTP/1.1" 200 OK
+WARNING:root:Malformed experiment '0_meta_backup'. Detailed error Yaml file '/app/data/mlruns/0_meta_backup/meta.yaml' does not exist.
+Traceback (most recent call last):
+  File "/usr/local/lib/python3.10/site-packages/mlflow/store/tracking/file_store.py", line 367, in search_experiments
+    exp = self._get_experiment(exp_id, view_type)
+  File "/usr/local/lib/python3.10/site-packages/mlflow/store/tracking/file_store.py", line 465, in _get_experiment
+    meta = FileStore._read_yaml(experiment_dir, FileStore.META_DATA_FILE_NAME)
+  File "/usr/local/lib/python3.10/site-packages/mlflow/store/tracking/file_store.py", line 1635, in _read_yaml
+    return _read_helper(root, file_name, attempts_remaining=retries)
+  File "/usr/local/lib/python3.10/site-packages/mlflow/store/tracking/file_store.py", line 1628, in _read_helper
+    result = read_yaml(root, file_name)
+  File "/usr/local/lib/python3.10/site-packages/mlflow/utils/yaml_utils.py", line 107, in read_yaml
+    raise MissingConfigException(f"Yaml file '{file_path}' does not exist.")
+mlflow.exceptions.MissingConfigException: Yaml file '/app/data/mlruns/0_meta_backup/meta.yaml' does not exist.
+INFO:     172.26.15.213:49154 - "GET /ajax-api/2.0/mlflow/experiments/search?max_results=25&order_by=last_update_time+DESC HTTP/1.1" 200 OK
+INFO:     172.26.15.213:49154 - "GET /ajax-api/2.0/mlflow/registered-models/search?filter=&max_results=25&order_by=name+ASC HTTP/1.1" 200 OK
+INFO:     172.26.15.213:49154 - "GET / HTTP/1.1" 200 OK
+INFO:     172.26.15.213:49154 - "GET /ajax-api/2.0/mlflow/registered-models/search?filter=&max_results=25&order_by=name+ASC HTTP/1.1" 200 OK
+INFO:     172.21.14.66:57907 - "GET / HTTP/1.1" 304 Not Modified
+WARNING:root:Malformed experiment '0_meta_backup'. Detailed error Yaml file '/app/data/mlruns/0_meta_backup/meta.yaml' does not exist.
+Traceback (most recent call last):
+  File "/usr/local/lib/python3.10/site-packages/mlflow/store/tracking/file_store.py", line 367, in search_experiments
+    exp = self._get_experiment(exp_id, view_type)
+  File "/usr/local/lib/python3.10/site-packages/mlflow/store/tracking/file_store.py", line 465, in _get_experiment
+    meta = FileStore._read_yaml(experiment_dir, FileStore.META_DATA_FILE_NAME)
+  File "/usr/local/lib/python3.10/site-packages/mlflow/store/tracking/file_store.py", line 1635, in _read_yaml
+    return _read_helper(root, file_name, attempts_remaining=retries)
+  File "/usr/local/lib/python3.10/site-packages/mlflow/store/tracking/file_store.py", line 1628, in _read_helper
+    result = read_yaml(root, file_name)
+  File "/usr/local/lib/python3.10/site-packages/mlflow/utils/yaml_utils.py", line 107, in read_yaml
+    raise MissingConfigException(f"Yaml file '{file_path}' does not exist.")
+mlflow.exceptions.MissingConfigException: Yaml file '/app/data/mlruns/0_meta_backup/meta.yaml' does not exist.
+INFO:     172.21.14.66:57907 - "GET /ajax-api/2.0/mlflow/experiments/search?max_results=25&order_by=last_update_time+DESC HTTP/1.1" 200 OK
+INFO:     172.21.14.66:57907 - "POST /graphql HTTP/1.1" 200 OK
+INFO:     172.21.14.66:57907 - "POST /ajax-api/2.0/mlflow/experiments/search-datasets HTTP/1.1" 200 OK
+INFO:     172.21.14.66:57907 - "GET /ajax-api/2.0/mlflow/gateway-proxy?gateway_path=api%2F2.0%2Fendpoints%2F HTTP/1.1" 200 OK
+INFO:     172.21.14.66:63494 - "POST /ajax-api/2.0/mlflow/logged-models/search HTTP/1.1" 200 OK
+INFO:     172.21.14.66:50488 - "POST /ajax-api/2.0/mlflow/runs/search HTTP/1.1" 200 OK
+INFO:     172.21.14.66:59334 - "POST /ajax-api/2.0/mlflow/runs/search HTTP/1.1" 200 OK
+INFO:     172.21.14.66:57224 - "POST /ajax-api/2.0/mlflow/runs/search HTTP/1.1" 200 OK
+INFO:     172.21.14.66:62861 - "POST /ajax-api/2.0/mlflow/runs/search HTTP/1.1" 200 OK
+INFO:     172.21.14.66:53143 - "POST /ajax-api/2.0/mlflow/runs/search HTTP/1.1" 200 OK
+INFO:     172.21.14.66:56815 - "GET /static-files/static/js/2633.610c7275.chunk.js HTTP/1.1" 200 OK
+INFO:     172.21.14.66:57244 - "GET /static-files/static/css/8455.3cd9f5ca.chunk.css HTTP/1.1" 200 OK
+INFO:     172.21.14.66:51830 - "GET /static-files/static/js/2586.e6839fb7.chunk.js HTTP/1.1" 200 OK
+INFO:     172.21.14.66:60496 - "GET /static-files/static/js/7453.2ee01df4.chunk.js HTTP/1.1" 200 OK
+INFO:     172.21.14.66:63375 - "GET /static-files/static/js/47.c3fdc3f4.chunk.js HTTP/1.1" 200 OK
+INFO:     172.21.14.66:62198 - "GET /static-files/static/js/701.e7dbd4d1.chunk.js HTTP/1.1" 200 OK
+INFO:     172.21.14.66:57244 - "GET /static-files/static/js/7364.b91e87c1.chunk.js HTTP/1.1" 200 OK
+INFO:     172.21.14.66:57244 - "GET /static-files/static/js/8455.d8d24bfc.chunk.js HTTP/1.1" 200 OK
+INFO:     172.21.14.66:56815 - "GET /ajax-api/2.0/mlflow/model-versions/search?filter=tags.%60mlflow.prompt.is_prompt%60+%3D+%27true%27+AND+tags.%60mlflow.prompt.run_ids%60+ILIKE+%22%25a928a32d5f074097abda309f1376068b%25%22 HTTP/1.1" 200 OK
+INFO:     172.21.14.66:57244 - "GET /ajax-api/2.0/mlflow/model-versions/search?filter=run_id%3D%27a928a32d5f074097abda309f1376068b%27 HTTP/1.1" 200 OK
+INFO:     172.21.14.66:60442 - "GET /ajax-api/2.0/mlflow/model-versions/search?filter=tags.%60mlflow.prompt.is_prompt%60+%3D+%27true%27+AND+tags.%60mlflow.prompt.run_ids%60+ILIKE+%22%25a928a32d5f074097abda309f1376068b%25%22 HTTP/1.1" 200 OK
+INFO:     172.21.14.66:64962 - "GET /ajax-api/2.0/mlflow/model-versions/search?filter=tags.%60mlflow.prompt.is_prompt%60+%3D+%27true%27+AND+tags.%60mlflow.prompt.run_ids%60+ILIKE+%22%25a928a32d5f074097abda309f1376068b%25%22 HTTP/1.1" 200 OK
