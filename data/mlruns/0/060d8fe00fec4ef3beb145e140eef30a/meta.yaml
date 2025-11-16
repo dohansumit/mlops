@@ -1,0 +1,14 @@
+artifact_uri: file:///home/sweta/mtp/data/mlruns/0/060d8fe00fec4ef3beb145e140eef30a/artifacts
+end_time: 1763273815067
+entry_point_name: ''
+experiment_id: '0'
+lifecycle_stage: active
+run_id: 060d8fe00fec4ef3beb145e140eef30a
+run_name: Sentiment_Analysis_20251116_114655
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1763273815039
+status: 3
+tags: []
+user_id: sweta

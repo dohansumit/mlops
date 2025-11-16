@@ -21,7 +21,7 @@ jobs:
 
     # Make mlflow write to workspace/data/mlruns on this runner
     env:
-      MLFLOW_TRACKING_URI: "file:${{ github.workspace }}/data/mlruns"
+      MLFLOW_TRACKING_URI: "file://${{ github.workspace }}/data/mlruns"
 
     steps:
       - name: Checkout repository
@@ -32,6 +32,18 @@ jobs:
           set -euo pipefail
           mkdir -p "${{ github.workspace }}/data"
           ls -la "${{ github.workspace }}" || true
+
+      - name: Install DVC (optional) and dvc pull
+        run: |
+          set -euo pipefail
+          python -m pip install --upgrade pip
+          pip install "dvc[s3]" || pip install dvc || true
+          if [ -f dvc.yaml ] || [ -f .dvc/config ]; then
+            echo "Running dvc pull to populate data (may require remote auth)..."
+            dvc pull -v || echo "dvc pull failed (continuing)"
+          else
+            echo "No DVC config found — skipping dvc pull"
+          fi
 
       - name: Run repo scripts (ingestion, preprocess, model, app) on the runner BEFORE container
         run: |
@@ -54,7 +66,6 @@ jobs:
               echo "WARN: ${cmd} not found; skipping ${name}"
               return 0
             fi
-            # ensure any scripts that use $DATA_DIR will see it
             DATA_DIR="${DATA_DIR}" "${cmd}"
             if [ $? -eq 0 ]; then
               echo "${name} ok at $(date -u)" > "${DATA_DIR}/.${name}_done"
@@ -103,8 +114,6 @@ jobs:
           fi
           docker rm -f cicd_mtp_test 2>/dev/null || true
           docker run -d --name cicd_mtp_test \
-            -e CHOWN_ON_START=1 \
-            -e DROP_TO_USER=1 \
             -e SKIP_TRAIN=1 \
             -e MLFLOW_PORT=5051 \
             -e MLFLOW_START_TIMEOUT=60 \
@@ -142,10 +151,9 @@ jobs:
     needs: pull-and-smoke
     runs-on: [self-hosted, linux, x64]
 
-    # On the host we want MLflow to use the host path
+    # On the host we want MLflow to use the host path (absolute)
     env:
-      # this ensures any scripts run on the host that rely on MLFLOW_TRACKING_URI write to host path
-      MLFLOW_TRACKING_URI: "file:/home/sweta/mtp/data/mlruns"
+      MLFLOW_TRACKING_URI: "file:///home/sweta/mtp/data/mlruns"
 
     steps:
       - name: Checkout repository
@@ -185,30 +193,26 @@ jobs:
           mkdir -p /home/sweta/mtp/data
           docker rm -f mtp_root 2>/dev/null || true
 
-      - name: Ensure host data dir exists and is writable (no sudo)
+      - name: Ensure host data dir exists (try mkdir/chmod with sudo if available)
         run: |
           set -euo pipefail
           TARGET_DIR=/home/sweta/mtp/data
-          echo "Checking ${TARGET_DIR} (no sudo attempt)..."
-          # try to create the dir as current runner user
+          echo "Checking ${TARGET_DIR} (attempt mkdir/chmod if needed)..."
           mkdir -p "${TARGET_DIR}" || true
-          # test writability
-          touch "${TARGET_DIR}/.ci_write_test" 2>/dev/null || true
-
+          # try to make it writable; prefer non-sudo, fallback to sudo if present
           if [ -w "${TARGET_DIR}" ]; then
             echo "${TARGET_DIR} is writable by $(id -un)"
-            rm -f "${TARGET_DIR}/.ci_write_test" 2>/dev/null || true
           else
-            echo "::error::${TARGET_DIR} is NOT writable by $(id -un)."
-            echo "Please run on the self-hosted runner host (once) the following as a user with sudo:"
-            echo ""
-            echo "  sudo mkdir -p /home/sweta/mtp/data"
-            echo "  sudo chown -R sweta:sweta /home/sweta/mtp/data"
-            echo "  sudo chmod -R 775 /home/sweta/mtp/data"
-            echo ""
-            echo "Alternatively, run the self-hosted runner as the 'sweta' user or adjust permissions so the runner user can write to ${TARGET_DIR}."
-            exit 1
+            if command -v sudo >/dev/null 2>&1; then
+              echo "Trying sudo to fix permissions (may prompt or require config)..."
+              sudo mkdir -p "${TARGET_DIR}" || true
+              sudo chmod -R 777 "${TARGET_DIR}" || true
+              echo "Permissions adjusted with sudo (if permitted)."
+            else
+              echo "::warning::${TARGET_DIR} is not writable by $(id -un). Container runs as root so it may still write to the mount, but consider fixing host perms."
+            fi
           fi
+          ls -ld "${TARGET_DIR}" || true
 
       - name: Run repo scripts on self-hosted runner BEFORE container
         run: |
@@ -231,7 +235,6 @@ jobs:
               echo "WARN: ${cmd} not found; skipping ${name}"
               return 0
             fi
-            # export HOST_DATA_DIR so scripts can read it
             HOST_DATA_DIR="${HOST_DATA_DIR}" DATA_DIR="${HOST_DATA_DIR}" ${cmd}
             rc=$?
             if [ $rc -eq 0 ]; then
@@ -259,26 +262,20 @@ jobs:
           DST="/home/sweta/mtp/data/mlruns"
           echo "Syncing ${SRC} -> ${DST}"
 
-          # If CI didn't produce mlruns, skip (don't fail deploy)
           if [ ! -d "${SRC}" ]; then
             echo "No mlruns in workspace (${SRC}) — skipping sync."
             exit 0
           fi
 
-          # Ensure destination exists and has permissive permissions
           mkdir -p "${DST}"
           chmod -R u+rwX,g+rwX,o+rX "$(dirname "${DST}")" || true
 
-          # Use rsync but do NOT attempt to change owner/group (avoids chown/chgrp errors)
           rsync -rlptD --no-owner --no-group --chmod=Du=rwx,Dgo=rx,Fu=rw,Fgo=r --delete "${SRC}/" "${DST}/" || true
 
-          # If chown is needed (container's mlflow runs as uid 1000), try to set it.
           echo "Attempting to chown ${DST} to uid 1000:1000 (if permitted)..."
           chown -R 1000:1000 /home/sweta/mtp/data 2>/dev/null || echo "chown not permitted by current user — continuing"
 
-          # Ensure basic permissions for readability
           chmod -R u+rwX /home/sweta/mtp/data || true
-
           echo "Sync step finished."
 
       - name: Log in to DockerHub on target
@@ -286,7 +283,7 @@ jobs:
           set -euo pipefail
           docker login -u "${{ secrets.DOCKERHUB_USERNAME }}" -p "${{ secrets.DOCKERHUB_TOKEN }}"
 
-      - name: Pull image on target (fail if not available) and start container
+      - name: Pull image on target (fail if not available) and start container (root mode)
         run: |
           set -euo pipefail
           if [ "${{ github.event.inputs.image_ref }}" != "" ]; then
@@ -297,11 +294,8 @@ jobs:
           echo "Pulling image ${IMAGE_TO_DEPLOY}"
           docker pull "${IMAGE_TO_DEPLOY}"
 
-          echo "Starting container mtp_root from ${IMAGE_TO_DEPLOY}"
+          echo "Starting container mtp_root from ${IMAGE_TO_DEPLOY} (running as root inside container)"
           docker run -d --name mtp_root \
-            --user $(id -u):$(id -g) \
-            -e CHOWN_ON_START=1 \
-            -e DROP_TO_USER=1 \
             -e SKIP_TRAIN=0 \
             -e MLFLOW_PORT=5051 \
             -e MLFLOW_START_TIMEOUT=120 \

@@ -1,9 +1,9 @@
-# Dockerfile: Full Pipeline + FastAPI + MLflow (root-run variant)
+# Dockerfile: Full Pipeline + FastAPI + MLflow (root-run, simplified for root-mode)
 FROM python:3.10-slim
 
 ARG USERNAME=mlflow
-ARG USER_UID=1000
-ARG USER_GID=1000
+ARG USER_UID=0
+ARG USER_GID=0
 
 ENV PYTHONDONTWRITEBYTECODE=1
 ENV PYTHONUNBUFFERED=1
@@ -16,6 +16,10 @@ ENV MLFLOW_PORT=5050
 ENV API_PORT=8080
 ENV SKIP_TRAIN=0
 
+# When running in "root mode" make entrypoint defaults align with root
+ENV USER_UID=${USER_UID}
+ENV USER_GID=${USER_GID}
+
 WORKDIR /app
 
 # -------------------------
@@ -23,29 +27,24 @@ WORKDIR /app
 # -------------------------
 RUN apt-get update \
     && apt-get install -y --no-install-recommends \
-       git curl bash build-essential procps ca-certificates sudo iproute2 \
+       git curl bash build-essential procps ca-certificates iproute2 \
     && rm -rf /var/lib/apt/lists/*
 
 # -------------------------
-# Create unprivileged user (available if you want to drop privileges)
-# -------------------------
-RUN groupadd --gid ${USER_GID} ${USERNAME} || true \
- && useradd --uid ${USER_UID} --gid ${USER_GID} --create-home --home-dir /home/${USERNAME} --shell /bin/bash ${USERNAME} || true \
- && echo "${USERNAME} ALL=(ALL) NOPASSWD:ALL" > /etc/sudoers.d/${USERNAME} && chmod 0440 /etc/sudoers.d/${USERNAME}
-
-# -------------------------
 # Python deps (single install)
+# - install requirements.txt first, then install runtime extras (mlflow, uvicorn, fastapi)
+# - include dvc so container can run `dvc pull` if desired
 # -------------------------
-COPY requirements.txt ./
-RUN pip install --upgrade pip \
+COPY requirements.txt ./requirements.txt
+RUN python -m pip install --upgrade pip \
  && pip install --no-cache-dir -r requirements.txt \
- && pip install --no-cache-dir mlflow "uvicorn[standard]" fastapi pandas feedparser yfinance
+ && pip install --no-cache-dir mlflow uvicorn[standard] fastapi pandas feedparser yfinance dvc
 
 # -------------------------
 # Project files
 # -------------------------
 RUN mkdir -p /app/data /app/src
-COPY --chown=${USER_UID}:${USER_GID} src/ src/
+COPY src/ src/
 
 # -------------------------
 # Expose ports
@@ -54,9 +53,7 @@ EXPOSE ${API_PORT}
 EXPOSE ${MLFLOW_PORT}
 
 # -------------------------
-# Entrypoint Script (robust: starts MLflow, waits for HTTP 200 on /, then starts API)
-# - Respects MLFLOW_TRACKING_URI if provided (file:// or path)
-# - run-pipeline now runs ingestion->preprocess->model -> starts mlflow -> starts FastAPI
+# Entrypoint script (preserved from your original file)
 # -------------------------
 RUN mkdir -p /usr/local/bin
 RUN cat > /usr/local/bin/fullpipeline-entrypoint.sh <<'EOF'
@@ -77,8 +74,8 @@ LOG_FILE="${DATA_ROOT}/mlflow.log"
 # DROP_TO_USER=1 -> after chown, drop to the unprivileged user and run services as that user
 CHOWN_ON_START="${CHOWN_ON_START:-0}"
 DROP_TO_USER="${DROP_TO_USER:-0}"
-USER_UID="${USER_UID:-1000}"
-USER_GID="${USER_GID:-1000}"
+USER_UID="${USER_UID:-0}"
+USER_GID="${USER_GID:-0}"
 USERNAME="${USERNAME:-mlflow}"
 
 # How long to wait for MLflow to become healthy (seconds)
