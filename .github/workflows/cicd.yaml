@@ -156,6 +156,13 @@ jobs:
           echo "GitHub runner labels: ${{ toJson(github.runner.labels) }}"
           echo "Runner name: ${{ github.runner.name || 'unknown' }}"
 
+      - name: Debug runner user & path ownership
+        run: |
+          echo "Runner user: $(id -un) (UID=$(id -u))"
+          echo "Runner groups: $(id -Gn)"
+          stat -c '%U %G %A %n' /home/sweta /home/sweta/mtp 2>/dev/null || true
+          ls -ld /home/sweta/mtp/data 2>/dev/null || echo "/home/sweta/mtp/data not present"
+
       - name: Check required secrets are present
         run: |
           if [ -z "${{ secrets.DOCKERHUB_USERNAME }}" ] || [ -z "${{ secrets.DOCKERHUB_TOKEN }}" ]; then
@@ -178,15 +185,30 @@ jobs:
           mkdir -p /home/sweta/mtp/data
           docker rm -f mtp_root 2>/dev/null || true
 
-      - name: Ensure host data dir exists and is owned by runner user (needs sudo)   # <<< NEW
+      - name: Ensure host data dir exists and is writable (no sudo)
         run: |
           set -euo pipefail
-          echo "Ensuring /home/sweta/mtp/data exists and is owned by 'sweta' (requires sudo)..."
-          sudo mkdir -p /home/sweta/mtp/data
-          # make the runner user 'sweta' owner so subsequent steps & containers can read/write
-          sudo chown -R sweta:sweta /home/sweta/mtp/data
-          sudo chmod -R 775 /home/sweta/mtp/data
-          echo "Ownership and permissions set on /home/sweta/mtp/data"
+          TARGET_DIR=/home/sweta/mtp/data
+          echo "Checking ${TARGET_DIR} (no sudo attempt)..."
+          # try to create the dir as current runner user
+          mkdir -p "${TARGET_DIR}" || true
+          # test writability
+          touch "${TARGET_DIR}/.ci_write_test" 2>/dev/null || true
+
+          if [ -w "${TARGET_DIR}" ]; then
+            echo "${TARGET_DIR} is writable by $(id -un)"
+            rm -f "${TARGET_DIR}/.ci_write_test" 2>/dev/null || true
+          else
+            echo "::error::${TARGET_DIR} is NOT writable by $(id -un)."
+            echo "Please run on the self-hosted runner host (once) the following as a user with sudo:"
+            echo ""
+            echo "  sudo mkdir -p /home/sweta/mtp/data"
+            echo "  sudo chown -R sweta:sweta /home/sweta/mtp/data"
+            echo "  sudo chmod -R 775 /home/sweta/mtp/data"
+            echo ""
+            echo "Alternatively, run the self-hosted runner as the 'sweta' user or adjust permissions so the runner user can write to ${TARGET_DIR}."
+            exit 1
+          fi
 
       - name: Run repo scripts on self-hosted runner BEFORE container
         run: |
@@ -277,6 +299,7 @@ jobs:
 
           echo "Starting container mtp_root from ${IMAGE_TO_DEPLOY}"
           docker run -d --name mtp_root \
+            --user $(id -u):$(id -g) \
             -e CHOWN_ON_START=1 \
             -e DROP_TO_USER=1 \
             -e SKIP_TRAIN=0 \
