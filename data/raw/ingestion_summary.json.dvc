@@ -1,6 +1,6 @@
 outs:
-- md5: f6041657ae570790b4d3b51354d5477d
-  size: 296
+- md5: 07b3f914e16f2927d1fd3421a49f3d96
+  size: 227
   hash: md5
   path: ingestion_summary.json
   isexec: true
