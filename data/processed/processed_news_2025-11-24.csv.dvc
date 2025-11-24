@@ -1,0 +1,5 @@
+outs:
+- md5: d15249ab61d2fc4472ba0b424fcd1bf5
+  size: 20769
+  hash: md5
+  path: processed_news_2025-11-24.csv
