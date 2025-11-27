@@ -1,0 +1,15 @@
+artifact_uri: file:///home/sweta/mtp/data/mlruns/0/93d96611fa994d93acac4aaa6582e6d0/artifacts
+deleted_time: 1763896146875
+end_time: 1763350097370
+entry_point_name: ''
+experiment_id: '0'
+lifecycle_stage: deleted
+run_id: 93d96611fa994d93acac4aaa6582e6d0
+run_name: Sentiment_Analysis_20251117_032817
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1763350097340
+status: 3
+tags: []
+user_id: root
